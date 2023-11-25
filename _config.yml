@@ -1,6 +1,6 @@
-title: "NLP Engineeered"
+title: "Profoundly Mundane"
 author: "Felix Labelle"
-description: "Blog on engineering in NLP" # This will show up in places like twitter, linkedin, etc, if you share your sites url as a post.
+description: "Welcome to Profoundly Mundane! This blog discusses engineering in the context of Natural Language Processing (NLP). While the amount of resources and information available has greatly increased within the last few years, many 'simple' subjects remain under-discussed. This makes it hard to understand the trade-offs when selecting NLP methods, unlike more established engineering fields. The goal of this blog is to explore the hidden depth within the seemingly mundane aspects of NLP and make understanding and making those design choices more accessible" # This will show up in places like twitter, linkedin, etc, if you share your sites url as a post.
 
 # Email / Social media user names used by the minima theme:
 # All of these are optional and can be removed or commented out
