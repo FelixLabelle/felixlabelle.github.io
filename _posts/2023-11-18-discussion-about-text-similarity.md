@@ -1,4 +1,4 @@
-# An in-depth discussion of textual similarity: Starting the Conversation
+# An In-depth Discussion of Textual Similarity: Starting the Conversation
 
 ## Target Audience
 
@@ -34,7 +34,7 @@ measure that. This text may not be all encompassing and become outdated with tim
 will not change. You need to correctly identify your problem, it's requirerments, what tools are appropriate, and 
 ways of evaluating success. This text aims to provide a strong base for how to do this in the context of similarity.
 
-* Note, I am actively updating this post. It probably has mistakes, of all sorts, and will likely change over the next week (11/25/2023) *
+**Note, I am actively updating this post. It probably has mistakes, of all sorts, and will likely change over the next week (11/25/2023)**
 
 ## Defining Similarity
 According to Merriam-Webster, similarity is the quality or state of being similar (having characteristics in common).
@@ -86,9 +86,11 @@ What does that even mean?? As we just saw there are a lot of charachteristics wh
 
 This primarily depends on the application and what matters to the downstream user. There is no singular definition and therein lies the issue.
 
-Let's say two texts discuss the same subject, but have different tones is that similar? It might be if you are deduplicating a dataset for training, but if you are comparing news articles for tone probably not.
+Let's say two texts discuss the same subject, but have different tones is that similar? It might be if you are deduplicating a dataset for training, but if you are comparing news articles for how a subject is covered probably not.
 
-## Until Next Time
+Identifying what matter for a task is a critical part of the development process. Due to the complexity of the subject we'll save that for another blog post.
+
+## Next Time on Semantic Similarity
 
 So we've covered why I think similarity is an under explored subject and come up with a working definition of it. The next step is to see that in practice. The next blog post
 will discuss use of similarity in tasks. What tasks can be framed as a similarity problem and some examples of what characteristics matter in each use case.
