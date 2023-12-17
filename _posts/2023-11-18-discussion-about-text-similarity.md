@@ -1,11 +1,32 @@
 # An In-depth Discussion of Textual Similarity: Starting the Conversation
 
-## Target Audience
+## The Introduction's Introduction
 
-This series of blog posts assumes some familiarity with NLP, ML, and textual similarity methods. Few if any methods will be 
+### Target Audience
+
+You do not need to be an NLP or ML expert to read this blog. It is meant to be stand alone and introduce a way of thinking about textual similarity that will 
+be helpful to people using NLP as part of an engineering stack.
+
+Be warned that few if any methods will be 
 explained in great detail, beyond what is necessary to illustrate their best usage. Some basic topics will be covered,
 but no more than necessary. Where relevant, additional resources will be pointed to if you'd like to learn more.
- 
+
+
+### Subject Covered
+
+This series of blogs only covers similarity methods for texts (think a phrase or larger) and does not discuss word embeddings (phonetic, sense, or otherwise) or any other type
+language embeddings (such as speech). These are interesting, but frankly subjects in their own right and not ones I have as much experience with.
+
+
+### PSAs
+
+This is not an all knowing guide, but one person's understanding of a subject. This blog is meant to structure a subject that I feel is underdiscussed in a way that makes 
+it more accessible.
+
+If there are any citations you believe are missing or could otherwise help improve the material let me know! I will add any missing references or material as need be
+
+**Note, I am actively updating this series. This blog and subsequent posts will change over the next week (12/18/2023)**
+
 ## Introduction
 
 In my time using Natural Language Processing (NLP), I've learned that there are a lot of tools to measure similarity between two texts.
@@ -34,7 +55,6 @@ measure that. This text may not be all encompassing and become outdated with tim
 will not change. You need to correctly identify your problem, it's requirements, what tools are appropriate, and 
 ways of evaluating success. This text aims to provide a strong base for how to do this in the context of similarity.
 
-**Note, I am actively updating this post. It probably has mistakes, of all sorts, and will likely change over the next week (11/25/2023)**
 
 ## Defining Similarity
 According to Merriam-Webster, similarity is the quality or state of being similar (having characteristics in common).
@@ -55,28 +75,6 @@ Besides pedantry, what was the point of this exercise It was to show that simila
 can matter for your downstream application. If you'd like to group messages with similar meanings together regardless of meaning, you'd need a method than favors that criteria
 over others like language. 
 
-## Characteristics of Text
-Below are some examples of characteristics that could be used to find similar texts
-
-- Syntax
-	- Language being used
-	- Word choice
-	- Granularity of text
-	- Grammatical structure
-		- Shared structure
-	- Length
-- Semantics
-	- Object
-	- Subject
-	- Action
-	- Facts
-- Pragmatics
-	- Tone (e.g., Sentiment, Friendliness,Formality)
-	- Context (e.g., referring to similar world events, having similar views, discussing the same thing in different ways)
-	- Text Type (e.g., satire, poetry, news)
-	- Style (e.g., descriptive, narrative)
-	
-Keep these in mind as we discuss different tasks.
 
 ## PSA: Semantic Similarity is not a (Single) Task
 
@@ -88,9 +86,10 @@ This primarily depends on the application and what matters to the downstream use
 
 Let's say two texts discuss the same subject, but have different tones is that similar? It might be if you are deduplicating a dataset for training, but if you are comparing news articles for how a subject is covered probably not.
 
-Identifying what matter for a task is a critical part of the development process. Due to the complexity of the subject we'll save that for another blog post.
+Identifying what aspect of language matters for a task is a critical part of the development process. Due to the complexity of the subject we'll save that for another blog post.
 
 ## Next Time on Semantic Similarity
 
-So we've covered why I think similarity is an under explored subject and come up with a working definition of it. The next step is to see that in practice. The next blog post
-will discuss use of similarity in tasks. What tasks can be framed as a similarity problem and some examples of what characteristics matter in each use case.
+So we've introduced why a blog post on similarity is needed and shown some examples of how ambiguous the current usage of the term is.
+
+The next step is to see how that translates into practice. The next blog post will discuss tasks that use or can be framed as similarity problems and the characteristics required for each
