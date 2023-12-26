@@ -1,4 +1,4 @@
-# How Textual Similarity can be Used
+# An In-depth Discussion of Textual Similarity: Characteristics and When They Matter
 
 ## The Introduction's Introduction
 
