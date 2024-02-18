@@ -12,7 +12,7 @@ explained in great detail, beyond what is necessary to illustrate their best usa
 but no more than necessary. Where relevant, additional resources will be pointed to if you'd like to learn more.
 
 
-### Subject Covered
+### Subjecs Covered
 
 This series of blogs only covers similarity methods for texts (think a phrase or larger) and does not discuss word embeddings (phonetic, sense, or otherwise) or any other type
 language embeddings (such as speech). These are interesting, but frankly subjects in their own right and not ones I have as much experience with.
@@ -20,12 +20,11 @@ language embeddings (such as speech). These are interesting, but frankly subject
 
 ### PSAs
 
-This is not an all knowing guide, but one person's understanding of a subject. This blog is meant to structure a subject that I feel is underdiscussed in a way that makes 
-it more accessible.
+This is not an all knowing guide, but one person's understanding of a subject. This blog is meant to structure a subject that I feel is under discussed in a way that makes 
+it more accessible. Currently similarity is presented as a monolith. However I feel that it is much more complicated than that and how to 
+implement and use similarity in practice requires a more subtle understanding of similarity. 
 
 If there are any citations you believe are missing or could otherwise help improve the material let me know! I will add any missing references or material as need be
-
-**Note, I am actively updating this series. This blog and subsequent posts will change over the next week (12/18/2023)**
 
 ## Introduction
 
@@ -35,10 +34,10 @@ used neural embeddings and cosine similarity to calculate similarity between gen
 to establish whether or not texts were similar and was in turn used to calculate precision and recall.
 However due to the, on average, relatively short text lengths this soft similarity gave misleading results compared to human judgment. 
 The algorithm was overly optimistic about matching entities and gave very high precision and recall scores (~150% higher)
-Switching to BLEU gave subjectively more accurate results. Not to say it was perfect, but it was more conservative which makes sense in this context.
+Switching to BLEU gave subjectively more accurate results. Not to say it was perfect, but it was more conservative which made sense in this context.
 
 Why was this even a problem in the first place? The team working on the project used the best similarity method around
-(according to many blogs and a paper). That's because neural embeddings didn't measure what they thought it did in this case.
+(according to many blogs and some papers). That's because neural embeddings didn't measure what they thought it did in this case.
 
 This type of issue is not uncommon. At work we've had a handful of projects which use similarity and every single one utilized different methods. The methods used were not always good fits.
 In my opinion the issues stems from the fact that there is no:
