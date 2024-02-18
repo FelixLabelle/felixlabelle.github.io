@@ -230,6 +230,7 @@ and train a model to appropriately classify text or repeat this exercise every t
 
 ## Conclusion
 
-We've discussed and defined 3 broad categories of textual similarity and shown some examples.
+We've discussed and defined 3 broad categories of textual similarity and shown some example tasks and how that framework can be applied.
 
-Next step is to discuss how to translate these characteristics into algorithms and implement similarity in practice.
+Next step is to discuss how to translate these characteristics into algorithms and implement similarity in practice. The post will discuss
+algorithms and a way of framing them together.
