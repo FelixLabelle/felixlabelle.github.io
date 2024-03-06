@@ -43,29 +43,14 @@ why we couldn't just add whole documents (whether as images or text) into prompt
 
 The answer is that 2 + 2 = 5. I think use of models in such a blind way is a bad idea for a number of reasons:
 
-### We Don't Know How Longer Contexts are Used
-
-WIP
-
-### Brittleness of Prompts
-
-WIP
-
-### Degradation of Performance in Shorter Context
-
-WIP
-
-### Do Commercial Models Support Multiple Images
-
-WIP
-
-### Cost
-
-WIP
-
-### Not Reusable
-
-WIP
+* [We don't know how well longer contexts are used](https://github.com/gkamradt/LLMTest_NeedleInAHaystack) (The source cited here is far from conclusive IMO as it is limited by the type of data used (Paul Graham Blogs) and the task. It is mostly used as it has been referenced by a large number of people including the companies products being tested)
+* [Brittleness of prompts](https://arxiv.org/abs/2210.02441). Who knows what you'll get? Slight tweaks to the prompt or image could lead to wildly different results
+	* Changes in text format (say the document is in Comic sans, does the model start telling jokes)?
+	* Slight changes in prompt
+* [Degradation of Performance in Shorter Context](https://arxiv.org/abs/2402.14848)
+* Cost
+* Only usable for models as a one-off, cannot be leverage by people after the fact
+* How good are multimodal models at this type of task even?
 
 ## The Idea
 
