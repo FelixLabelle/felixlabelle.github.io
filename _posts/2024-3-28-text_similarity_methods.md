@@ -1,4 +1,4 @@
-# An In-depth Discussion of Textual Similarity: Taking a look at the toolkit, understanding our options
+# An In-depth Discussion of Textual Similarity: Taking a look at the toolkit
 
 ## The Introduction's Introduction
 
