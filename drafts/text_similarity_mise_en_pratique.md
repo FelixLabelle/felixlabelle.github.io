@@ -12,57 +12,92 @@ This is the third post in a series of blog posts on textual similarity. If you h
 
 ## Introduction
 
-We need to define what is being returned and how to measure success in similarity.
+Before going through the algorithms that calculate text similarity, we need discuss considerations when choosing them.
+Below is a list, in no particular order, of different considerations 
 
+<!-- Rework order -->
 
-## Features by which similarity methods
+1. Determinism
+2. Computational Requirements (Training) 
+3. Computational Requirements (Prep Work)
+3. Computational Requirements (Inference)
+4. Input Size/Granularity Invariance
+5. Commutativity
+6. Characteristics captured
+7. Performance (Objective)
+8. Performance (Subjective)
+9. Performance (Robustness)
 
-1. Granularity
-2. Speed
-3. Correctness
-4. characteristics captured
-5. Order invariance
-6. Reversibility f(a,b) = f(b,a)
-7. Randomness
-8. Overlap sensitivtiy
-9. Score vs Binary
+The following subsections will deep dive into each of the following
 
-## Types of returns
-While there may well be other types of returns, I'm just familiar with two, binary and continuous. These are not necessarily mutually exclusive
-### Binary
+Contemporary models (and most similarity methods) have three stages:
+1. Training
+2. Preparation
+3. Inference
 
-### Continous
+### Characteristics Captured
 
-## Types of comparisons
+We've mostly talked about what characteristics are, which exist. As an engineer, what matters is how well the end product works, so the discussion 
+of them at length might seem a bit pointless. What matters is  whether that is how people much people "like" the end product or how well the model does some task (metrics of course). 
 
-### Pairwise
+From an application point view, the characteristics are really just used to ground discussion about what makes two texts similar. For corpus cleaning, we only care
+about removing eggregiously similar examples. So we might be interesting in methods that only check for overlap. Using word overlap won't capture synonymy, so it might be best suited for corpus cleaning.
 
-### Corpus Aware
+If your application is likely to need certain types of information captured, you'll want to be sure your similarity method can capture them.
 
-## 
+### Computational Requirements (Inference)
 
-## Evaluating similarity
+Time required
 
-There are different ways of evaluating them and they will reflect the need of the application:
+What hardware is used CPU vs Accelerator (GPU,TPU, etc..):
 
-Regardless of the framing you should first develop a benchmark and this requires a dataset and metrics. Do
+At a system level this matters. Cost, access, platform lock, etc..
+Some systems can't be turned on and off at will. There are currently limits on # of gpus
 
-### Binary Similarity
+A CPU can be equally fast or faster for smaller models (REFERENCE)
 
+There are also more typical considerations such as memory usage
 
-Are they the same or not using a threshold. This is similar to any other binary similarity task
+When there are examples stored,
+retrieval time, memory usage, time to retrieve matter
 
-### Ranking Similarity
+### Performance
 
-IR requires this 
+I think there are three principle components to measuring sucess for textual similarity
+1. Defining the output, is it binary or is it rankings. You could use a binary model to do rankings, asumming it output some sortable output (like confidence), but there is an important distinction to be made
+2. Selecting an appropriate dataset(s) to measure success. If you pick data that is wildly different, either in terms of task or domain, you're metrics are not necessarily meaningful
+3. Correct metrics that capture what you are looking for. If you framed your task as a binary sucess, you're likely going to use classification metrics. For ranking other metrics like
+precision @ k or NDCG make more sense.
 
-Are the distances measured meaningful (matching human judgement or requirements)? Are they monotone?
+### Input Size/Granularity Invariance 
 
-Some benchmarks I've seen in IR are good candidates for this.
+I've noticed models have varying performance across different lengths. Try to find papers on the subject or think of a simple example
 
+### Commutativity
+
+Not all 
+### Determinism
+
+### Computational Requirements (Training)
+
+Training is meant as a catch-all, this include preparing a not always necessary. Some models don't 
+
+### Performance (Subjective)
+Correlation with human judgement
+
+### Performance (Robustness)
+
+Does noise cause major issues? mispellt words, alternate spelling or synonyms, nicknames (Regz vs truth in lending act)
+
+Do domain changes cause major issues?
 
 ## Conclusion
 
+Beyond characteristics that make texts similar, there are additional considerations. 
+
+Performance
+
+Etc..
 <!--
 
 Considerations when selecting algorithms
