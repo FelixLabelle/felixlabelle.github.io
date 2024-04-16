@@ -2,38 +2,56 @@
 
 ## The Introduction's Introduction
 
-This is the third post in a series of blog posts on textual similarity. If you haven't already read the previous posts I recommend reading them. TL:DR those posts;
+This is the fourth post in a series of blog posts on textual similarity. If you haven't already read the previous posts I recommend reading them. TL:DR those posts;
 1. Define the target audience
 2. Caveat the series
 3. Define what textual similarity is
 4. Discuss how current usage of the term is too broad
 5. Describe characteristics of similarity that matters and provide a taxonomy to reason about them
 6. Give specific examples of tasks and how they map up to the taxonomy
+7. Introduce and define a taxonomy for similarity methods
 
 ## Introduction
 
-Before going through the algorithms that calculate text similarity, we need discuss considerations when choosing them.
+Beyond algorithms, we need discuss considerations when choosing them.
 Below is a list, in no particular order, of different considerations 
 
 <!-- Rework order -->
 
-1. Determinism
-2. Computational Requirements (Training) 
-3. Computational Requirements (Prep Work)
-3. Computational Requirements (Inference)
-4. Input Size/Granularity Invariance
-5. Commutativity
-6. Characteristics captured
-7. Performance (Objective)
-8. Performance (Subjective)
-9. Performance (Robustness)
-
-The following subsections will deep dive into each of the following
+1. Performance
+	1. Robustness
+		1. OOD
+		2. noise
+		3. Input size Invariance
+		4. Commutativity
+		5. Determinism
+	2. Objective
+	3. Subjective 
+		1. Aligned with expectations
+		2. Scores match expectations
+2. Computational Requirements
+	1. Training
+	2. Prep Work
+	3. Inference
+3. Characteristics captured
 
 Contemporary models (and most similarity methods) have three stages:
 1. Training
 2. Preparation
 3. Inference
+
+
+The following subsections will deep dive into each of the following
+
+## Performance
+
+### Repeatability
+
+This section is primarily concerned with how consistent a method is. If I run it twice, do I get the same results and if I inverse argument order, do I get the same result.
+
+Commutativity is typical in most methods, however for some of the n-gram methods it is not. For neural methods it is not either. 
+
+
 
 ### Characteristics Captured
 

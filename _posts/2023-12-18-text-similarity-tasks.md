@@ -184,16 +184,39 @@ Folytnek et al. set out five types of plagariasm. I've taken the liberty of tagg
 
 ### Information Retrieval
 
-WIP
+This subject is one of the first examples that comes to mind when discussing similarity methods. Information retrieval, in it's simplest and most common form, consists
+of taking a query and returning the most relevant documents. Depending on the query, this could require any of two types of textual information:
+1. Syntactically: Often the words we choose to query will show up in a document, so just finding documents that contain those words does pretty well
+2. Meaning: Synonymous words or concepts won't be captured by syntax based approaches. "Cutest cat breed" will not match results that only contain the words "kitten", which could still contain relevant information.
 
+I can't really think of a context where a query would contain Meta-textual information, but I may just lack imagination. Feel free to comment below if you think of one.
+
+#### Multilingual IR
+
+[Here's a summary of Multilingual IR (MLIR) courtesy of Bob Frederking](https://www.cs.cmu.edu/~ref/mlim/chapter2.html). While the difference between IR and MLIR may seem  minor it has interesting implications.
+The two texts retrieved will not only not be written in the same way,
+they will not be in the same language, maybe not even in the same alphabet or character set.  This poses additional 
+challenges not seen by IR. It is however distinct from translation, in that you are not necessarily just trying to find an equivalent text, but rather meaningful results WRT to that text.
+Meta-textual elements might come into play here as well, because idioms or common expressions need to be translated in a meaningful way. Different audiences may also have different
+frames of reference (popular shows, etc..) which could shape which questions are asked in a given language (or region).
+
+#### Question Answering
+
+WIP, still thinking about whether using similarity for QA is a separate task or something fundamentally related to IR.
 
 ### Translation
 
-WIP
+Translation is not a task I have a lot of experience with, especially framing it as a retrieval problem. The contexts in which I've seen translation framed as retrieval are: 
+1) Retrieving the nearest match in a pool of candidates. While this may seem odd, as it does limit the output space, this can make sense from a safety/liability point of view. No need to rely on an online verification process if you have a finite universe of acceptable outputs
+2) [Creation of datasets through the alignment of monolingual corpora](https://arxiv.org/abs/1711.00043)
+3) [As part of a translation system, either to generate candidates or give additional information to the model](https://aclanthology.org/N18-1120/)
 
-### Question Answering
+Translation I think involves meaning and the Meta-textual. Meaning as you need to capture the 5Ws and meta-textual for everything related to cultural references. If you fail to convery the important facts,
+that defeats the point of communication in general. As for the Meta-textual, I think it's important when you are trying to be understood, idioms are one example of this. Another one, if someone made a reference to a German 60s pop band
+as an example of a popular band, it would likely be lost on anyone who isn't a German speaker or familiar with German culture from the 60s. It might make sense to rank a document mentioning a reference familiar to the audience (linguistically,
+culturally, age-wise, etc..).
 
-WIP
+
 
 ### Mapping
 
@@ -202,7 +225,7 @@ is to finding if two different types of documents are related to one another.
 
 At work I often need to map regulatory texts to compliance texts (essentially a procedure that makes sure the company is following the law). The idea is to make sure an organization has covered all the appropriate laws with procedures.
 
-We couldn't frame this problem as syntatic or meaning based similarity if we tried.
+We couldn't frame this problem as syntactic or meaning based similarity if we tried.
 1. These two texts don't look a like, they don't use the same wording
 2. They don't even discuss the same things. The regulation describes what must not happen and the procedure describes what is being done without ever referencing what it prevents explicitly
 
@@ -213,9 +236,13 @@ I have not seen any model be able to bridge this gap. Often the solution involve
 
 ### Clustering
 
-I mention this downstream use of similarity for completeness. To be frank, I'm skeptical of clustering,
+Clustering goes beyond the text <> text setting, we've discussed, but I mention this downstream use of similarity for completeness. It often comes up when discussing
+similarity and unsupervised learning seems to be in vogue at the moment.
 
-Finding structure in any kind of data, forget text, is difficult. 
+Clustering can be done on any level (syntactic, semantic, or Meta-textual). The method you use to represent text or find simialrties between texts will determine which of these
+(it's unclear if/how well they can be decoupled).
+
+To be frank, I'm skeptical of clustering, finding structure in any kind of data, forget text, is difficult. 
 
 First multiple structures can exist. There is a NYT game called "Connections", where 16 words are presented.
 You group together words into 4 sets of 4. There are often multiple set of 4 that could be valid or alternate labels which aren't. Now imagine how complicated this becomes
@@ -227,6 +254,7 @@ together data from the same regulator or vaguely related concepts. It could not 
 
 While there are ways of trying to distill meaning from the patterns found, this is often a one off exercise. You will need to either convert this into a hierarchy
 and train a model to appropriately classify text or repeat this exercise every time you get new data. In practice if you can define what you want to group together, you should save yourself time and label data.
+
 
 ## Conclusion
 
