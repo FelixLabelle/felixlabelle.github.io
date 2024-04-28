@@ -56,6 +56,8 @@ My use case was very simple and I think that's why this method worked
 3. The model used was a low-depth (1) decision tree. It's rather simple and likely implements something similar to thresholding. Not sure if this played a role, I need to do more experiments.
 4. Binary vs multi-class. While there are ways to generalize this (use a shared nudge label or multiple nudge labels), I'm not sure how they would fare
 
+I don't have any examples, code or data since this was done for work. so my apologies for that.
+
 ## Conclusion
 
 Confusion based acquisition functions can have a cold start issue when labeling a minority class. When doing a simple, binary class classifier it is possible to introduce a pseudo-class to tag "bad adjacent"
