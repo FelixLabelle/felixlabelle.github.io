@@ -218,7 +218,7 @@ culturally, age-wise, etc..).
 
 
 
-### Mapping
+### Mapping {#mapping}
 
 Mapping is again a task I haven't come across in literature per say, but it would likely fall under the umbrella of "semantic similarity". Mapping in this context
 is to finding if two different types of documents are related to one another.
