@@ -1,4 +1,4 @@
-# Practical Tidbits: ELasticSearch with custom Embeddings (Vectors) for Versions &gt; 7.6
+# Practical Tidbits: ELasticSearch with custom Embeddings (Vectors) for Versions Greater than 7.6
 
 Recently I was deploying embeddings used for [mapping](https://felixlabelle.github.io/2023/12/18/text-similarity-tasks.html#mapping) as part of a platform we're developing for work. We decided to use ElasticSearch (ES), specifically version 8.13.2. The reasons were
 1. We already had an instance of ES deployed
