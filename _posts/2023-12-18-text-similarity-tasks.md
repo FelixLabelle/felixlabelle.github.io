@@ -17,9 +17,9 @@ can be framed as similarity.
 
 When comparing two texts, in my opinion there are three categories of similarity. These are:
 
-1. Structural, this relates to how the text looks and is written. Texts that are similar look the same.
-2. Textual, this is what information is conveyed by the text. Texts that are similar convey the same information.
-3. Meta-textual, this information not captured by the text. Texts that are similar can be grouped together in some way not explicitly captured by the text. This could be style, similar concepts, etc..
+1. Structural, this relates to how the text looks and is written. Texts that are similar look more or less the same.
+2. Textual, this is what information is conveyed by the text. Texts that are similar convey the same information regardless of structure.
+3. Meta-textual, this information not captured by the text. Texts that are similar can be grouped together in some way not explicitly captured by the text. This could be style, subject, genre, etc..
 
 Inspired by [syntax, semantics, and pragmatics](http://www.wu.ece.ufl.edu/books/philosophy/language.html), these categories help provide a taxonomy for characteristics of text. They help differentiate 
 matches based on surface level characteristics from textual meaning or contextual elements.
@@ -28,6 +28,7 @@ Each of these categories is comprised of characteristics.
 
 - Syntactic
 	- Word choice
+	- Word order
 	- Grammatical structure
 - Textual
 	- Information being conveyed (e.g., referring to similar world events, having similar views, discussing the same thing in different ways). I typically think of this as being comprised of the "5Ws":
@@ -72,7 +73,7 @@ Coverage, as I define it, is a related task where we make sure smaller subsectio
 #### The structural side of attribution
 
 There are two use cases I have in mind: parsing and retrieval augmented generation (RAG). The following section will discuss parsing, but the principles apply to both. RAG will 
-be further mentionned in the following subsection.
+be further mentioned in the following subsection.
 
 While parsing documents is not something all NLP practitioner have done or will need to do, I have done that several times in different use cases. Often when working with large
 legal texts they have a natural structure that subdivides them into smaller sections. People work at this level and we need to subdivide the text for it to be useful for SMEs and 
@@ -121,7 +122,7 @@ We will discuss these tasks together and how similarity can be used to do them. 
 
 #### Dataset Deduplication
 
-One use of deduplication is to curate training datasets. This can be used to removed contradictorly labelled data or remove very common data 
+One use of deduplication is to curate training datasets. This can be used to removed contradictory labels or common data 
 from your corpus. In the context of pretraining LLMs, it has been shown to improve performance.
 
 However other papers debate this. 
@@ -164,7 +165,7 @@ Sampling datasets for domain transfer
 This is a subject I'm not familiar with, but none the less find relevant when discussing similarity. I will refer heavily on the work of [Folytnek et al.](https://dl.acm.org/doi/10.1145/3345317) and suggest you take this section 
 with a grain of salt. It is based on my understand of textual similarity rather than experience with plagiarism detection. 
 
-Folytnek et al. set out five types of plagariasm. I've taken the liberty of tagging them as one of the three types of similarity. For specific methods I would refer you to the survey cited and recent literature. The idea of this mapping is just to highlight the types of tools appropriate for specific types of plagiarism and how to best detect them.
+Folytnek et al. set out five types of plagiarism. I've taken the liberty of tagging them as one of the three types of similarity. For specific methods I would refer you to the survey cited and recent literature. The idea of this mapping is just to highlight the types of tools appropriate for specific types of plagiarism and how to best detect them.
 
 
 1. Characters-preserving plagiarism (Syntactic)
