@@ -49,9 +49,9 @@ In my opinion the issues stems from the fact that there is no:
 
 This first post will address issue 1. and future blog posts will discuss the other 4 points. At the end of this series, you should be able to confidently identify what problems can be framed as 
 similarity, properties your problem requires, what algorithms satisfy your constraints, and how to properly
-measure that. This text may not be all encompassing and become outdated with time, however the underlying principle
+measure that. This post may not be all encompassing and become outdated with time, however the underlying principle
 will not change. You need to correctly identify your problem, it's requirements, what tools are appropriate, and 
-ways of evaluating success. This text aims to provide a strong base for how to do this in the context of similarity.
+ways of evaluating success. This post aims to provide a strong base for how to do this in the context of similarity.
 
 
 ## Defining Similarity
@@ -66,17 +66,18 @@ Let's focus on one part of that definition, characteristics. There are different
 
 Let's get the obvious out of the way, 1 & 4 are not just similar, they are the same. They share all the same characteristics. Between our other
 pairs, which is more similar will depend on what characteristics you are looking at. If you consider formality or meaning an important characteristic, 1 & 3 are most similar in my opinion.
-The more astute among you will have noticed 1 & 3 are in different languages. In which case, you could say 1 & 5 are more similar, in spite of having completely different meanings.
+The more astute among you will have noticed 1 & 3 are in different languages. Based on that alone you could say 1 & 5 are more similar than 1 & 3, in spite of having completely different meanings.
 A thing all these examples share is they are questions, so in a one aspect they are all similar.
 
-Besides pedantry, what was the point of this exercise It was to show that similarity is not this straightforward yes/no exercise. There are different dimensions to text and these 
-can matter for your downstream application. If you'd like to group messages with similar meanings together regardless of meaning, you'd need a method than favors that criteria
-over others like language. 
+Besides pedantry, what was the point of this exercise?
+
+It was to show that similarity is not this straightforward yes/no exercise. There are different dimensions to text and these 
+can matter for your downstream application. If you'd like to group messages based on formality regardless of language, you'll need a method that can do that.
 
 
-## PSA: Semantic Similarity is not a (Single) Task
+## Semantic Similarity is not a (Single) Task
 
-The term Semantic Similarity gets used a lot in NLP when textual similarity is brought up. As of 11/04/2023 HuggingFace states Sentence Similarity is "the task of determining how similar two texts are". 
+The term semantic similarity gets used a lot in NLP when textual similarity is brought up. As of 11/04/2023 HuggingFace states Sentence Similarity is "the task of determining how similar two texts are". 
 
 What does that even mean?? As we just saw there are a lot of characteristics which can make two texts similar or dissimilar.
 
