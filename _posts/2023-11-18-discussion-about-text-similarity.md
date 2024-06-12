@@ -12,11 +12,10 @@ explained in great detail, beyond what is necessary to illustrate their best usa
 but no more than necessary. Where relevant, additional resources will be pointed to if you'd like to learn more.
 
 
-### Subjecs Covered
+### Subjects Covered
 
 This series of blogs only covers similarity methods for texts (think a phrase or larger) and does not discuss word embeddings (phonetic, sense, or otherwise) or any other type
 language embeddings (such as speech). These are interesting, but frankly subjects in their own right and not ones I have as much experience with.
-
 
 ### PSAs
 
