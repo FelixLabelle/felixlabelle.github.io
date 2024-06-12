@@ -240,16 +240,16 @@ I have not seen any model be able to bridge this gap. Often the solution involve
 Clustering goes beyond the text <> text setting, we've discussed, but I mention this downstream use of similarity for completeness. It often comes up when discussing
 similarity and unsupervised learning seems to be in vogue at the moment.
 
-Clustering can be done on any level (syntactic, semantic, or Meta-textual). The method you use to represent text or find simialrties between texts will determine which of these
+Clustering can be done on any level (syntactic, semantic, or Meta-textual). The method you use to represent text or find similarities between texts will determine which of these
 (it's unclear if/how well they can be decoupled).
 
 To be frank, I'm skeptical of clustering, finding structure in any kind of data, forget text, is difficult. 
 
 First multiple structures can exist. There is a NYT game called "Connections", where 16 words are presented.
 You group together words into 4 sets of 4. There are often multiple set of 4 that could be valid or alternate labels which aren't. Now imagine how complicated this becomes
-when we are talking about a whole document rather than a single word.
+when we are talking about a whole document rather than a single word. Especially if we are talking about 1000+ documents, the number of relationships found is likely high.
 
-Second the issue is finding meaningful patterns. Your model will find patterns, most of which (if not all) in my experience are meaningless. 
+Second issue is finding meaningful patterns. Your model will find patterns, most of which (if not all) in my experience are meaningless. 
 I've tried clustering regulations from different regulators using a variety of embeddings/techniques and all that we built was a very powerful way of grouping
 together data from the same regulator or vaguely related concepts. It could not find a taxonomy of regulations like a human would.
 
