@@ -1,4 +1,4 @@
-# "Nudging" Active Learning
+# "Nudging" Active Learning to Learn Minority Classes
 
 ## What is Active Learning?
 
