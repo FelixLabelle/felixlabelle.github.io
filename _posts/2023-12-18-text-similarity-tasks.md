@@ -115,7 +115,7 @@ The point is this, if you want to output something besides the text itself, make
 a reason to do this as it adds a lot of complexity and will likely require training and evaluating your own verification method. We will cover how to do this in practice in future
 blog posts.
 
-### Data Molding and Deduplication
+### Data Molding and Deduplication {#deduplication}
 
 Data molding is the general process of selecting or filtering data. A specific type of molding is deduplication. Deduplication, in the context of two text documents, will refer to the process of identifying and removing two similar texts or documents.
 We will discuss these tasks together and how similarity can be used to do them. Below are 4 applications I've encountered that fall into these categories
