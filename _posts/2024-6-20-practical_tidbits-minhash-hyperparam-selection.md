@@ -1,11 +1,11 @@
-# Practical Tidbits: Selecting MinHash hyper parameters for Deduplication (in new domains)
+# Practical Tidbits: Selecting MinHash Hyper Parameters for Deduplication
 
 In practice deduplicating large datasets is expensive and time consuming, especially if using common similarity methods like embeddings. Some embeddings are computationally less expensive to calculate and 
 use like TF-IDF, but these can still be prohibitive. One  alternative is MinHash used with LSH as an index.
 
 While there are good libraries for MinHash & LSH there are hyper parameters to pick and it's unclear which values are best for a given downstream task. [There isn't really a consensus or extensive testing as far as I'm aware, especially not for non-web domain data](https://huggingface.co/blog/dedup).
 
-This blog presents a procedure and corresponding code to select the hyper paramters that best mimic Jaccard similarity for your data.
+This blog presents a procedure and corresponding code to select the hyper parameters that best mimic Jaccard similarity for your data.
 
 
 ## Background: What are MinHash + LSH for?
@@ -22,12 +22,12 @@ The process to compute Jaccard similarity would look like:
 		1. stemming/ lemmatization
 		3. casing
 		4. OOV/rare word handling (UNKs)
-	3. Creating a set s_i and s_j (or multiset, occurence counts)
+	3. Creating a set s_i and s_j (or multiset, occurrence counts)
 	4. Calculate Jaccard similarity of s_i, s_k, in other words the intersection(s_i,s_k)/union(s_i,s_j)
 2. Flag all pairs the threshold t
 
 Deduplicating this way, while simple and fast compared to other methods, could be made even faster. Both steps presented above can be accelerated
-1. Similarity: Set overlap (Jaccard) can be approximated using minhash
+1. Similarity: Set overlap (Jaccard) can be approximated using MinHash
 2. Pair by pair search: We can use locality sensitive hashing (LSH) to bin together similar documents and only compare documents that may be similar
 
 
