@@ -1,4 +1,4 @@
-# "Nudging" Active Learning to Learn Minority Classes
+# Original Work: "Nudging" Active Learning to Learn Minority Classes
 
 ## What is Active Learning?
 
