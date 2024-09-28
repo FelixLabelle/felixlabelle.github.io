@@ -123,7 +123,7 @@ is the delta between the mean of a sample of both the clustered and control voca
 
 Below is a plot of the distribution of F1 scores across both the reference and control.
 
-![Histogram of the F1 scores for both the reference and control vocabs](f1_score_plot.png)
+![Histogram of the F1 scores for both the reference and control vocabs](/images/f1_score_plot.png)
 
 Results for the significance test are as follows:
 
