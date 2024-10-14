@@ -1,4 +1,4 @@
-# Quick and Dirty Metric to Imperial Conversions; How to Entertain Yourself as an American Driving in a Metric Country
+# Quick and Dirty Metric to Imperial Conversions (How to Entertain Yourself as an American Driving in a Metric Country)
 
 I was driving in Canada recently, the fun part being all my car's gauges are in imperial (i.e., Freedom 🦅) units (miles per hour, miles, etc..), but road signage is in metric units (Kmph,Km).
 
