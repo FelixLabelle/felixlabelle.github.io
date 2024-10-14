@@ -22,7 +22,7 @@ A more accurate estimation method accounts for the tenths position:
 SPEED_MPH = (6*SPEED_KMPH/10) + SPEED_KMPH//50
 ```
 This gives a speed of `62 mph`.
-This estimate is really close since `100 Km/h ~= 62.1371mph`. The trailing error won't be noticeable until we near 1000+Km/h.
+This estimate is really close since `100 Km/h ~= 62.1371mph`. The trailing error won't be noticeable until we near `1000+Km/h`.
 Probably not an issue unless your driving a supersonic jet and need to convert units on the fly.
 
 In real life you should probably just pull over and change your gauges, but this kept me entertained for a little bit while driving.
