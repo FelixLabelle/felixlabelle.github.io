@@ -1,4 +1,4 @@
-# Fun With Words: NYT Connections Part 1
+# Fun With Words: NYT Connections
 
 NLP isn't all business, it can be fun too. I enjoy word puzzles from time to time, like NYT Connections. It is a game where you try to group 16 words into 4 groups of 4, each with different themes. There are 4 difficulties of themes, easiest -> hardest.
 
@@ -17,6 +17,8 @@ I wanted to know if NYT Connections could be solved by machines. This blog is a,
 I decided to frame this problem as a generative one. There are other framings, see the next steps for those. I chose this framing since it seemed like a strong and
 easy to implement baseline. The model is used to generate a structured output that indicates which words are grouped together. The following subsections
 explore the setup of the experiments and different design decisions.
+
+The code used to run the experiments can be [found here](https://github.com/FelixLabelle/connections_solver/blob/main/generate_experiments.py).
 
 ### Dataset
 
@@ -225,18 +227,21 @@ There were some trends in particular I was curious about, so here are a bunch of
 
 Due to the limited data and use of covariate techniques I wouldn't draw any conclusions about trends. There are also confounding variables
 that aren't really discussed within the context of this analysis (# param probably isn't as meaningful between model families, e.g., 8B Llama3 outperformed
-Gwen).
+Gwen). Even for variables like K-shot, performance for a given K might also vary with the model.
 
+<!-- TODO: Add an analysis for multivariate other?? -->
 
 ## Conclusion and Next Steps
 
-Current results are rather poor, with the best model getting only 16% (32 out of 200) groups correct. While there are tweaks that could be done to the experiments above such as:
+Current results are rather poor, with the best model getting only 16% (32/200) of the groups correct. While there are tweaks that could be done to the experiments above such as:
 1. Use of ChatGPT
 2. Higher values of K
 3. Use of a regex for guided generation (requires a different library or custom code
 4. Prompt optimization, likely not manually but rather through use of prompt optimization tools like [DSPy](https://github.com/stanfordnlp/dspy) or [TextGrad](https://github.com/zou-group/textgrad)
 
 I would rather focus on fundamentally different approaches that are more efficient and potentially leverage data structures to solve the problem.
-The likely candidate in my mind is a combination of framing the problem as one of binary classification (whether two words are related) and use
-of a dynamic programming algorithm to pick which group of four is most likely, potentially with additional checks for validity. This would enable
-batching and potentially even use of smaller models. I'm also interested in evaluating the correctness of labels. Future work would likely focus on those two aspects.
+
+
+Next attempt will likely be a combination of framing the problem as classification (whether two ore more words are related) and use
+of a dynamic programming algorithm to pick which groups of four is most likely, potentially with additional checks for validity. This would enable
+batching and potentially even use of smaller models.
