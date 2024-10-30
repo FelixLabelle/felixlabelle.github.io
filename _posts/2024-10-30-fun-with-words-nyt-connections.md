@@ -200,7 +200,7 @@ For now two metrics were implemented
 ### Raw Results
 
 
-| model_id                              | use_structured_prediction   |   k_shot |   mean_accuracy |   percentage_format_passed |
+| model_id                              | `use_structured_prediction`   |   `k_shot` |   mean_accuracy |   percentage_format_passed |
 |:--------------------------------------|:----------------------------|---------:|----------------:|---------------------------:|
 | meta-llama/Llama-3.2-3B-Instruct      | False                       |        5 |       0.06      |                       0.58 |
 | Qwen/Qwen2.5-3B-Instruct              | True                        |        0 |       0.035     |                       1    |
@@ -260,12 +260,12 @@ between independent and dependent variables. Two analyses used to measure correl
 
 | Independent Variable | Dependent Variable | Correlation | P Value |
 |:-----------|:-----------|:-----------|:-----------|
-| Model Params | Accuracy | 0.531 | 1e-4 |
-| K-shot | Accuracy | 0.131 | 0.373 |
-| Structured | Accuracy | 0.279 | 0.055 |
-| Model Params | Validity | 0.084 | 0.561|
-| K-shot | Validity | 0.301 | 0.037 |
-| Structured | Validity | 0.885 | 1e-17 |
+|`param_count`  | Accuracy | 0.531 | 1e-4 |
+| `k_shot`  | Accuracy | 0.131 | 0.373 |
+| `use_structured_prediction` | Accuracy | 0.279 | 0.055 |
+|`param_count` | Validity | 0.084 | 0.561|
+| `k_shot`  | Validity | 0.301 | 0.037 |
+| `use_structured_prediction` | Validity | 0.885 | 1e-17 |
 
 Coefficient analysis using linear regression tells a similar story, with the only major difference being that `k_shot` seems to hurt mean accuracy.
 Otherwise the relationships, in terms of importance rather than raw values, seems to be the same between coefficients.
