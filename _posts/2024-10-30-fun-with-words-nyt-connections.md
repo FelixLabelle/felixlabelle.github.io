@@ -56,7 +56,7 @@ Used JSON as the output's structure as it is easy to work with and validate usin
 This may well effect impact performance in a way that makes comparing models difficult, 
 but there likely would be no "fair" format. Here is a function which generates regex describing an example valid output,
 
-
+{% raw %}
 ```
 def generate_validation_regex(words):
     qouted_words = [f"\"{word}\"" for word in words]
@@ -73,7 +73,7 @@ def generate_validation_regex(words):
 
     return regex_str.strip()
 ```
-
+{% endraw %}
 The gist of it is that words is generated from a fixed set and words can't repeat (hence the lookarounds, see back1->back15).
 
 #### Guided Generation
@@ -94,6 +94,7 @@ Used greedy decoding. Adding in different decoding approaches and additional hyp
 I used a very simple prompt and didn't tweak it. While models are brittle, messing around with prompts to improve performance is trivial IMO and falls outstide of the scope of these experiments.
 The prompt used was:
 
+{% raw %}
 ```
 You are an expert problem solver. You are doing the "connections" puzzle. You will receive 16 words.
 
@@ -114,6 +115,7 @@ Categories will always be more specific than "5-LETTER-WORDS," "NAMES" or "VERBS
 
 Each puzzle has exactly one solution. Watch out for words that seem to belong to multiple categories!
 ```
+{% endraw %}
 
 ### Hyper-parameters (Independent Variables)
 
@@ -145,6 +147,7 @@ Different k-shot values were used.
 
 K-shot examples are picked at random from the connections dataset (or sample) excluding the current item and added afterwards.
 
+{% raw %}
 ```
 if k_shot > 0:
 	# TODO: Implement k shot
@@ -156,7 +159,7 @@ if k_shot > 0:
 		messages.append({"role" : "user", "content" : f"Your words are {";".join(k_shot_connections_words)}. Good luck!"})
 		messages.append({"role" : "assistant", "content" : json.dumps(formatted_example)})
 ```
-
+{% endraw %}
 #### Guided vs Unguided generation
 
 Tried both guided and unguided generation.
