@@ -198,6 +198,8 @@ For now two metrics were implemented
 ## Results
 
 ### Raw Results
+
+
 | model_id                              | use_structured_prediction   |   k_shot |   mean_accuracy |   percentage_format_passed |
 |:--------------------------------------|:----------------------------|---------:|----------------:|---------------------------:|
 | meta-llama/Llama-3.2-3B-Instruct      | False                       |        5 |       0.06      |                       0.58 |
