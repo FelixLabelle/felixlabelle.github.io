@@ -8,7 +8,7 @@ While there are other critiques of Pickle for storing objects, such as [speed an
 Specifically with regards to storing data long term. Not necessarily just data in the sense of "here's a CSV file", but more as in "weights of a neural network", "contents of a tree" where the class holding the data is what gives it "use".
 Ironically, in that context, pickles (the file format) don't have a very good shelf-life.
 
-## Important Limitations of Pickle
+## Pickle's Import(ant) Limitation
 
 I don't understand the inner workings of Pickle, but don't need to to discuss some sources of potential issues.
 
@@ -88,7 +88,7 @@ You might say "version incompatibility is minor, you just need to make sure your
 
 You're not wrong, but what happens if a pickle has been sitting for 2-3 years and the original environment used to create it can't be recreated it anymore (broken wheels, ancient versions, etc..)
 
-I could "repickle" the object with more recent libraries, but the code used to create has long since been broken. Plus will I get the same results, who knows??
+I could "repickle" the object with more recent libraries, but the code used to create has long since been broken. Plus will I get the same results, who knows?
 
 Guess what, in that case, the data is essentially lost AFAIK. You could take the time to recreate the environment, but at that point it might be easier to just 
 restart the project and only keep the part you need. IMO you are just kicking the can down the road. You'll still need to update the code and verify 
