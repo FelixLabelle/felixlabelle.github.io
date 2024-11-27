@@ -119,7 +119,7 @@ Each puzzle has exactly one solution. Watch out for words that seem to belong to
 
 ### Hyper-parameters (Independent Variables)
 
-Below is the list of hyper-parameters that were varied and their values. The experiment runs essentially a grid search of the following hyper-parameters. See [generate_experiments.py]().
+Below is the list of hyper-parameters that were varied and their values. The experiment runs essentially a grid search of the following hyper-parameters. See [generate_generative_solver_experiments.py](https://github.com/FelixLabelle/connections_solver/blob/main/generate_generative_solver_experiments.py).
 
 #### Models
 
