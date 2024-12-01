@@ -461,7 +461,8 @@ run every test point, but some slipped by.
 | Qwen/Qwen2.5-14B-Instruct             |          14   |          1 | themed           |            4 |           0.3   |
 | Qwen/Qwen2.5-14B-Instruct             |          14   |          3 | themed           |            4 |           0.265 |
 
-<details>
+</details>
+
 ## Analysis
 
 Two analyses were conducted, one for performance trends and the other comparing structured approaches to generative approaches. Originally a third analysis was planned
@@ -535,6 +536,9 @@ with one taking 20 times longer.
 I think this is due to the larger models and longer queries being split between CPU and GPU which negated the advantage of larger batch sizes. The raw results for the comparisons are
 presented below. `time_ratio` is the percentage of time the structured approach took compared to the generative approach (structured/gen). `accuracy_delta` is given by `mean_accuracy_structured` - `mean_accuracy_generative`.
 
+<details>
+<summary> Click to see raw results </summary>
+
 | model_id                              |   k_shot |   total_run_time_seconds_generative |   total_run_time_seconds_structured |   mean_accuracy_generative |   mean_accuracy_structured |   accuracy_delta |   time_ratio |
 |:--------------------------------------|---------:|------------------------------------:|------------------------------------:|---------------------------:|---------------------------:|-----------------:|-------------:|
 | Qwen/Qwen2.5-1.5B-Instruct            |        0 |                            1482.99  |                             60.7417 |                  0.02      |                      0.12  |         0.1      |    0.0409589 |
@@ -585,7 +589,7 @@ presented below. `time_ratio` is the percentage of time the structured approach 
 | meta-llama/Meta-Llama-3.1-8B-Instruct |        3 |                            1363.04  |                            884.927  |                  0.065     |                      0.21  |         0.145    |    0.649232  |
 | meta-llama/Meta-Llama-3.1-8B-Instruct |        5 |                             675.371 |                           1360.02   |                  0.06      |                      0.2   |         0.14     |    2.01374   |
 | meta-llama/Meta-Llama-3.1-8B-Instruct |        5 |                            1433.59  |                           1360.02   |                  0.02      |                      0.2   |         0.18     |    0.948679  |
-
+</details>
 ## Conclusion and Next Steps
 
 Long story short task decomposition and structured prediction does still help this generation of models when solving NYT connections. There are
