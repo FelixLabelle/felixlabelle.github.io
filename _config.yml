@@ -20,7 +20,10 @@ linkedin_username: "felix-labelle"
 theme: "minima"
 
 rss: rss
-
+markdown: CommonMarkGhPages
+commonmark:
+  options: ["UNSAFE", "SMART", "FOOTNOTES"]
+  extensions: ["strikethrough", "autolink", "table", "tagfilter"]
 kramdown:
   syntax_highlighter_opts:
     disable: true
