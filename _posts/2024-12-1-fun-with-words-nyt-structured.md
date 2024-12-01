@@ -328,6 +328,9 @@ These metrics were ignored for now to be consistent with the previous post, but 
 Below are the results. Any missing results are due to the experiment erroring out. A small number failed due to OOMs. Best effort was made to 
 run every test point, but some slipped by.
 
+<details>
+<summary> Click to see raw results </summary>
+
 | model_id                              |   param_count |   prompt_k | prompt_version   |   resolution |   mean_accuracy |
 |:--------------------------------------|--------------:|-----------:|:-----------------|-------------:|----------------:|
 | meta-llama/Llama-3.2-1B-Instruct      |           1   |          0 | default          |            4 |           0.015 |
@@ -458,6 +461,7 @@ run every test point, but some slipped by.
 | Qwen/Qwen2.5-14B-Instruct             |          14   |          1 | themed           |            4 |           0.3   |
 | Qwen/Qwen2.5-14B-Instruct             |          14   |          3 | themed           |            4 |           0.265 |
 
+<details>
 ## Analysis
 
 Two analyses were conducted, one for performance trends and the other comparing structured approaches to generative approaches. Originally a third analysis was planned
