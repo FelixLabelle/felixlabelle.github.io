@@ -199,7 +199,8 @@ For now two metrics were implemented
 
 ### Raw Results
 
-
+<details>
+<summary> Click to see raw results </summary>
 | model_id                              | `use_structured_prediction`   |   `k_shot` |   mean_accuracy |   percentage_format_passed |
 |:--------------------------------------|:----------------------------|---------:|----------------:|---------------------------:|
 | meta-llama/Llama-3.2-3B-Instruct      | False                       |        5 |       0.06      |                       0.58 |
@@ -250,6 +251,7 @@ For now two metrics were implemented
 | Qwen/Qwen2.5-1.5B-Instruct            | True                        |        5 |       0.005     |                       1    |
 | Qwen/Qwen2.5-14B-Instruct             | False                       |        1 |       0         |                       0    |
 | meta-llama/Meta-Llama-3.1-8B-Instruct | False                       |        3 |       0.08      |                       0.96 |
+</details>
 
 ### Analysis
 
