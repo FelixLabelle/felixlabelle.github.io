@@ -368,6 +368,7 @@ if k_shot > 0:
 ```
 {% endraw %}
 </details>
+
 ### Metrics
 
 Only one metric was implemented, mean accuracy i.e., percentage of groups the model got correct. This approach isn't difficulty aware, nor is it taxonomy aware.
