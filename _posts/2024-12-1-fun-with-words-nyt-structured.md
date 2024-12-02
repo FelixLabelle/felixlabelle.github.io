@@ -1,24 +1,18 @@
-# Fun with Words: A Foray into Solving NYT Connections via Decomposition (1.5/N)
+# Fun with Words: A Foray into Solving NYT Connections via Decomposition
 
-** Currently A WIP 12/1**
+Picking up where the last post on ["solving" NYT connections](https://felixlabelle.com/2024/10/30/fun-with-words-nyt-connections.html) left off, 
+this post focuses on the use of explicit decomposition rather than further improving generative solutions to NYT connections.
+Specifically using a model to do pairwise similarity and then use search to find the best combinations. In spite of all the improvements
+in LLMS over the last 5 years, I don't believe they have the ability to do multi-step planning (no citation, just my impression).
+For this reason my intuition is that a structured approach would benefit both performance and speed. This approach would reduce the
+number of tokens generated, facilitate batching, and best utilize the model's ability to generalize to new tasks (e.g., k-shot prompting) while avoiding their weaknesses like planning.
 
-As discussed in the [last post on "solving" NYT connections](https://felixlabelle.com/2024/10/30/fun-with-words-nyt-connections.html), 
-this post will focus on the use of explicit decomposition rather than further improving generative solutions to NYT connections. No need to have the model find the structure on its own, instead make the problem a "simpler" one and use search to find
-the best fitting solution.
-The problem is divided into pairwise (word) [similarity](https://felixlabelle.com/2023/11/18/discussion-about-text-similarity.html#defining-similarity)
-and then those similarities are in turn used to find the best groups of four using a search algorithm.
-
-
-My inclination before running these experiments was that this approach would benefit both performance and speed. In spite of all the improvements
-in models the recent years I don't think they have the ability to "reason". Instead I think by guiding them through with use of explicit structure we can leverage
-the knowledge they capture about the world without being limited by their inability to "reason".
-Another potential benefit is increasing the ease of collecting training data by transforming the task from a one where puzzles need to be 
-generated to one where word pairs need to have potential links identified.
 
 ## Relevant Work
 
-[A paper introducing NYT connections dataset was published in EMNLP](https://arxiv.org/html/2406.11012v3) 1-2 weeks ago as of writing. I hadn't seen it pre-EMNLP (although it's been on Arxiv since July),
-so this post will reuse last post's dataset. In an upcoming post on NYT connections I plan on using their subset of the connections problems, their taxonomy, and their metrics to allow
+[A paper introducing NYT connections dataset was published in EMNLP](https://arxiv.org/html/2406.11012v3) 1-2 weeks ago as of writing. I hadn't seen it pre-EMNLP (although it's been on Arxiv since July).
+In an upcoming post on NYT connections I plan on using their subset of the connections problems, their taxonomy, and their metrics to allow
+
 1. comparison to closed source models like GPT-4
 2. comparison to human performance
 3. finer-grained analysis of model outputs
@@ -34,8 +28,8 @@ The code used to run the experiments can be [found here](https://github.com/Feli
 
 ### Dataset
 
-[This NYT connections repo by "Eyefyre"](https://github.com/Eyefyre/NYT-Connections-Answers) was used with an October 12th cutoff was used to make the results comparable
-to the generative approach.
+
+To keep results comparable to the generative approach [this NYT connections repo by "Eyefyre"](https://github.com/Eyefyre/NYT-Connections-Answers). Specifically with an [October 12th cutoff](https://github.com/Eyefyre/NYT-Connections-Answers/tree/d1f2c6ca3fd6f690217f275e0d39914f40aae083).
 
 ### Design Decisions
 
@@ -56,38 +50,44 @@ use the same seed, though that may change to enable for multiple generation seed
 
 The seed was 42, because 42.
 
-#### Prompted Models for Classification 
+#### Use of LLMs and Prompting for Similarity
 
-To classify if two words are similar prompting of LLMs was used exclusively because
-1. types of relationships required by connections might limit viable models
-2. reuse of the same models makes comparison to the previous post easier.
-3. limited training data
+While there are [different ways of measuring word similarity](https://felixlabelle.com/2024/03/28/text_similarity_methods.html),
+LLMs and prompting were used in this case because:
+1. types of relationships required for finding connections might limit viable approaches
+2. reuse of the same models makes comparison to the previous post easier
+3. limited data makes training less feasible/ideal
 
-To go into more depth about point 1., the types of relationships captured in NYT connections go beyond word association. [Samadarshi et al.](https://arxiv.org/html/2406.11012v3) propose a taxonomy on the types of groupings in NYT connections:
+To go into more depth about point 1., the types of relationships captured in NYT connections go beyond synonymy. [Samadarshi et al.](https://arxiv.org/html/2406.11012v3) propose a taxonomy on the types of groupings in NYT connections:
 
 ![Grouping taxonomy proposed by Samadarshi et al.](/images/nyt_taxonomy_similarity.png)
 
-At a quick glance, some of these categories can't be handled by word embeddings. E.g., polysemy; word embeddings aren't contextual so they can't give multiple representations to a given token. More likely than 
-not word embeddings will fail at associations requiring this relationship (my guess is unless it's their most common usage).
+At a quick glance, some of these categories can't be handled by word embeddings. E.g., polysemy; word embeddings aren't contextual so they can't give multiple representations to a given token. 
+The classic example is bank. It can be a financial institution, but could also refer to a river bank. One representation for a given token in this context is not ideal. More likely than 
+not word embeddings will fail at associations requiring this relationship (my guess is unless it's that words most common usage).
 
-Similarly I'm not sure how well word embeddings capture knowledge. Not sure orange objects will be grouped similarly in an embedding space, for example
-carrot and goldfish give a similarity of 0.23 which would mean this pair is considered unlikely although both have a relationship (they are all organge).
+Similarly I'm not sure how well word embeddings capture knowledge. Consider the example above.
+Orange objects will not likely be grouped together. Using [pretrained Word2Vec vectors](https://huggingface.co/NathaNn1111/word2vec-google-news-negative-300-bin)
+carrot and goldfish give a similarity of 0.23 which would mean this pair is considered unlikely although both have a relationship (they are all orange).
+
+That's not to say static word embeddings wouldn't work at all, but they would likely be rather limited so we don't explore them in this post.
 <!-- TODO: Run experiment here and add details -->
 <!-- http://epsilon-it.utu.fi/wv_demo/ -->
 
-LLMs seem like a better fit since they do appear to capture some ["knowledge"]().
-<!-- TODO: Find a good citation-->
-
 #### Extracting Labels
 
-To reliably extract binary classes  from the prompted LLMs masking was used.
-Any token that can be turned into `yes` or `no` by lower casing or stripping leading & trailing spaces is considered a valid output.
-The indices of all the yes and no tokens are used as a mask.
-The logits are used to calculate a probability distribution. The yes/no mask is applied and the resulting probabilities
-are normalized (they sum to 1).
+To reliably extract classes from LLMs additional steps were taken. First only one token was generated for each word pair.
+Second the logits of this output were masked to limit which tokens the model could generate, specifically `yes` or `no`.
+
+To mask the logits any token that can be turned into `yes` or `no` by lower casing or stripping leading & trailing spaces is considered a valid output.
+The indices of all the `yes` and `no` tokens are stored.
+The logits are softmaxed, giving a probability distribution. The yes/no mask is applied and the resulting probabilities
+are normalized (i.e., they now sum to 1).
 All the probabilities for the yes tokens are summed together and that is the probability of two words being similar. This is 
 what is used for search.
 
+<details>
+<summary> Click to show the masking code </summary>
 {% raw %}
 ```
 yes_idxs = [idx for word,idx in tokenizer.vocab.items() if word.replace('Ġ','').lower().strip() == "yes"]
@@ -131,11 +131,49 @@ masked_probs /= masked_probs.sum(axis=1).reshape(-1,1).tile(1,masked_probs.shape
 yes_prob = masked_probs[:,yes_idxs].sum(axis=1)
 ```
 {% endraw %}
+</details>
 
 #### Similarity Aggregation Method
 
-The model's predictions and resulting confidence are not order invariant. The range of difference in order is ... for ...
-The binary classifier analysis provides more details on the spread.
+The model's predictions and resulting confidence are not order invariant. I.E., for a given pair of words,
+the prompt may give wildly different results. Here is one example from the following settings:
+```
+	"ICE", "MIST": 0.7504248023033142,
+	"MIST", ICE: 0.1840386837720871
+```
+
+<details>
+<summary> This particular example comes from the experiment with these settings </summary>
+```
+	"metadata": {
+		"parameters": {
+			"seed": 42,
+			"model_id": "Qwen/Qwen2.5-7B-Instruct",
+			"resolution": 4,
+			"prompt_version": "default",
+			"sample_size": 50,
+			"prompt_k": 3,
+			"generation_chunk_size": 2,
+			"search_k": 10,
+			"search_random_top_k": -1,
+			"search_patience": 0,
+			"search_type": "greedy",
+			"aggregation_type": "max",
+			"search_perm_cap": 2
+		},
+		"code_version": "0.0.4",
+		"total_run_time_seconds": 576.552084700088,
+		"write_date": "2024-12-01"
+	},
+```
+</details>
+
+Notice the massive difference. This is particularly bad in this case since this example is from a group.
+
+As of yet I have done a thorough analysis on binary performance, so I can't speak to the scale of the issue. However I did notice
+significant performance issues when trying to average results in an earlier pilot study
+
+
 
 Aggregation methods are used to overcome this limitation. Different aggregation methods were implemented;
 `aggregation_dict = {"min" : min,"max" : max,"mean": mean, "first" : lambda x: x[0], "last" : lambda x:[-1]}`
@@ -145,20 +183,26 @@ Only `max` was used to minimize the number of hyperparameters tried.
 #### Search
 
 Search was not a big focus of this work, a local search algorithm was implemented and used.
-The global score of a given example is given by 
+The objective function is given by 
+
 ```
 def evaluate(words,sims,generation_chunk_size):
     return np.prod([sims[idx_combination] for group in batcher(words,4) for idx_combination in generate_keys(group,generation_chunk_size)])
 ```
 
-where `words` is a list of 16 words. Each group of four within it represents a model prediction. Sims is a dictionary which uses a tuple of words
-as indices and model confidence as the output. 
+where `words` is a list of 16 words. Each group of four within it represents a predicted group. Sims is a dictionary which uses a tuple of words
+as indices and model confidence as the output. The score is given by the product of the similarities at the pairwise level for each group.
+Once group wise scores are computed, the product of these group scores gives the score for a given guess. Higher scores mean the model is more certain.
+
+
 An initial list of `'k'
 random groupings are first generated then scored. Pairwise permutations are conducted for each input.
 `search_type` can be `random` or `greedy`. For `greedy` the top `k` inputs are scored and then each permuted.
 `random` picks `k` random inputs. Annealing strategies were not implemented nor tested. After computing the scores
 of these permutations the top `k` are kept. The algorithm continues until `patience` turns have passed without improvement.
 
+<details>
+<summary> Click to show the search code </summary>
 
 {% raw %}
 ```
@@ -216,7 +260,7 @@ def local_search(sims, generation_chunk_size, k =10, patience=0, search_type="gr
     return idx_tuples_to_search[0],idx_scores[0]
 ```
 {% endraw %}
-
+</details>
 For all the experiments conducted the settings were:
 ```
 k=10
@@ -226,30 +270,31 @@ search_patience=0
 
 These settings were determined after a small pilot using `Llama3.1-8B`. While better results were achieved by increasing `k` and `patience` up to 5, there was a point of diminishing returns. Given the long run times 
 already I decided to leave this be for now.
-Currently results are precomputed so search can be redone after the fact. I may explore different optimization methods later using this data.
+Currently results are precomputed so search can be redone after the fact.
 
 #### Use of Pairs
 <!-- TODO: Add word invariance reference -->
 
 Originally both groups of 2 and 4 where going to be used to calculate similarity for a group. However combinatorics, the lack of word invariance in LLMs, and limited engineering efforts
-made groups of 4 not computationally viable. Groups of 4 require 16 choose 4 (1820) GPU inferences at a minimum. However, this assumes that 
+made groups of 4 not computationally feasible. Groups of 4 require 16 choose 4 (1820) GPU inferences at a minimum. However, this assumes that 
 the similarity given to a particular group is order invariant. In other words:
 sim((1,2,3,4)) = sim((4,3,2,1))
 
-However this isn't the case (see binary results analysis below). That means to get a good estimate on the "true similarity" we need to try multiple permutations of a given group
-and aggregate them. If we try all the 4 sized permutations of 16 we get that there are 43680 permutations. Each of those is a GPU call and the current approach calculates all the similarities upfront and then does search using those. 
+However this isn't the case as shown above. That means to get a good estimate on the "true similarity" we need to try multiple permutations of a given group
+and aggregate them. If we try all the 4 sized permutations of 16 we get that there are 43680 permutations. Each of those is a GPU call and the current approach calculates all the similarities upfront.
+This would quickly become a bottleneck.
 
 I originally tried limiting the number of permutations tried to 2-3, but this is still brutally slow. Realistically search would need to select which groups to calculate.
 
 ### Hyper-parameters (Independent Variables)
 
-Below is the list of hyper-parameters that were varied and their values. The experiment runs essentially a grid search of the following hyper-parameters. See [generate_experiments.py]().
+Below is the list of hyper-parameters that were varied and their values. The experiment runs essentially a grid search of the following hyper-parameters. See [generate_structured_experiments.py](https://github.com/FelixLabelle/connections_solver/blob/main/generate_structured_experiments.py).
 
 
 #### Models
 
-To preserve compatibility with the previous experiments only Qwen and Llama3 models were used. Qwen 7B as a comparable 
-model to Llama3 8B in analyses related to the role of param-size and model family.
+To preserve compatibility with the previous experiments only Qwen and Llama3 models were used. The only change is that Qwen 7B 
+was added as a comp to Llama3.1 8b.
 
 ```
 model_ids = [
@@ -265,7 +310,7 @@ model_ids = [
 
 #### Quantization
 
-Unlike the generative experiments where only 4 bit models were used, the decomposition approach leveraged 4,8 and 16-bit models as well. The reasoning was two-fold
+Unlike the generative experiments these experiments leveraged 4,8 and 16-bit models as well. The reasoning was two-fold
 1. Less likely to run into OOMs or take an excessive amount of time due to limited output length
 2. Quantization may have an impact on the model's "confidence" and skew results (this is related to calibration I think)
 <!-- is 2 true? If so is this a good citation https://aclanthology.org/2024.acl-long.544/? -->
@@ -274,6 +319,8 @@ Unlike the generative experiments where only 4 bit models were used, the decompo
 
 Two prompts were used, themed and default. They are:
 
+<details>
+<summary> Click to show the prompts used </summary>
 {% raw %}
 ```
 default_system_prompt = "Given two words, give a yes or no answer as to whether or not the words have a relationship."
@@ -295,15 +342,18 @@ system_prompt_dict = {
 }
 ```
 {% endraw %}
-
+</details>
 
 #### K-Shot
 
 K-shot examples (other word pairs) were also appended to the prompt to improve performance. Different k-shot values were used.
 `k_shot_options = [0, 1, 3, 5]`
 
-K-shot examples are picked at random from the connections dataset (or sample) excluding the current item and added afterwards.
+K-shot examples are picked at random from the connections dataset (or sample) excluding the current item. These examples are appended
+to the prompt as dialogs in a chat.
 
+<details>
+<summary> Click to show the k-shot code </summary>
 {% raw %}
 ```
 if k_shot > 0:
@@ -317,8 +367,8 @@ if k_shot > 0:
 		messages.append({"role" : "assistant", "content" : json.dumps(formatted_example)})
 ```
 {% endraw %}
-
-### Metrics (Dependent Variables)
+</details>
+### Metrics
 
 Only one metric was implemented, mean accuracy i.e., percentage of groups the model got correct. This approach isn't difficulty aware, nor is it taxonomy aware.
 These metrics were ignored for now to be consistent with the previous post, but will be added in an upcoming post.
@@ -501,12 +551,12 @@ resolution, and number of examples. Two analyses used to measure correlation:
 #### Analysis
 
 It looks like parameter count is again the biggest factor when it comes to improving performance, although unlike last time 
-the number of k examples seems help rather than hurt. Not sure why that is.
+the number of k examples seems help rather than hurt. Not sure why that is, I'm currently think about why.
 
 Qwen model's seem to do better, but there are some confounding factors. The fact the largest model is a Qwen model so this may be throwing the analysis off.
 
 Resolution's role is odd too. In the multivariate analysis it seems to matter (the least, but still) unlike in the correlation analysis where it seems to play
-any role.
+any role. My analysis might be a bit odd, currently looking into this.
 
 <!--
 #### Correlation between Binary Performance and Downstream Performance
@@ -523,7 +573,7 @@ In terms of performance, structured prediction is a clear winner. To compare the
 2. Model used
 3. K-shot
 4. Prompt used (Default-only)
-This created 48 paired scores. When comparing the generative experiments one-to-one in this way and structured prediction experiments
+This created 48 paired scores. When comparing the generative and structured experiments
 the mean average accuracy is significantly higher (12.5% absolute improvement on average) for structured prediction. The p-value of this result is 0.0002 and 
 was calculated using resampling with the statistic being the mean of the difference of values between experiments.
 
@@ -533,7 +583,7 @@ but at a glance looks to be true. Moreover the models no longer generate invalid
 
 In terms of time the results are less conclusive. For smaller models and larger models under smaller k-shot values experiment times are any from 95%-50% less. But for the larger models experiments are rather slow
 with one taking 20 times longer.
-I think this is due to the larger models and longer queries being split between CPU and GPU which negated the advantage of larger batch sizes. The raw results for the comparisons are
+I think this is due to the larger models and longer queries being split between CPU and GPU which negated the advantage provided by larger batch sizes. The raw results for the comparisons are
 presented below. `time_ratio` is the percentage of time the structured approach took compared to the generative approach (structured/gen). `accuracy_delta` is given by `mean_accuracy_structured` - `mean_accuracy_generative`.
 
 <details>
@@ -593,23 +643,14 @@ presented below. `time_ratio` is the percentage of time the structured approach 
 ## Conclusion and Next Steps
 
 Long story short task decomposition and structured prediction does still help this generation of models when solving NYT connections. There are
-both performance and speed gains, although speed gains come from batching which may be hampered if your model doesn't fit on GPU. Another advantage of this approach is that you can more easily gather data for the sub-problem than the larger problem. Rather than synthetically create
-groupings of 16 with 4 themes, training or evaluation data can consistent of word pairs.
-
-Considering this is only one task mostly with "smaller" models, the conclusion that we can draw about model performance are somewhat limited. It does appear that structure 
+both performance and speed gains, although speed gains come from batching which may be hampered if a model doesn't fit on GPU.
 
 While performance has improved drastically (nearly doubling even for the larger models) it is still lacking IMO. The scores are similar to those for novices in
-Samadarshi et al. (although we don't use the same dataset so this may not hold). In a future post the following things will be investigated:
-1. Investigate different search techniques
-2. Integrate generation and search for efficiency
-3. Explore additional hyper-parameters
+[Samadarshi et al.](https://arxiv.org/html/2406.11012v3) (although we don't use the same dataset so this may not hold). Next steps include:
+1. Investigating different search techniques
+2. Integrating generation and search for efficiency
+3. Exploring additional hyper-parameters
 	1. Larger models (Qwen models above 14B parameters)
 	2. Taxonomy based prompts
 	3. Larger k-values
 4. Using Samadarshi et al.'s dataset and additional metrics
-
-A longer term plan is to build a light model able to cheaply do classification tasks such as these with no additional training. Ideally even
-smaller than 1B. I don't think
-it's possible to create universally-useful representations. I think while pretrained approaches may generate representations that help across most if not all tasks,
-there is a limit and at some point it is necessary to specialize. For this reason I'm focusing on ways of either searching for suitable representations or
-using some way of "steering" model embeddings to this end.
