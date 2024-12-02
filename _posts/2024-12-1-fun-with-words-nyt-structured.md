@@ -641,6 +641,7 @@ presented below. `time_ratio` is the percentage of time the structured approach 
 | meta-llama/Meta-Llama-3.1-8B-Instruct |        5 |                             675.371 |                           1360.02   |                  0.06      |                      0.2   |         0.14     |    2.01374   |
 | meta-llama/Meta-Llama-3.1-8B-Instruct |        5 |                            1433.59  |                           1360.02   |                  0.02      |                      0.2   |         0.18     |    0.948679  |
 </details>
+
 ## Conclusion and Next Steps
 
 Long story short task decomposition and structured prediction does still help this generation of models when solving NYT connections. There are
