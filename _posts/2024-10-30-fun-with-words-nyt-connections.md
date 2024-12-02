@@ -180,6 +180,7 @@ This is implemented using Pydantic classes.
 
 <details>
 <summary> Click to see code </summary>
+
 ```
 AllowedWords = Enum('AllowedWords', {val: val for val in connections_words},type=str)
 
@@ -190,6 +191,7 @@ class Group(BaseModel):
 lass ConnectionSolution(BaseModel):
 		groups : conlist(Group,min_length=4,max_length=4)
 ```
+
 </details>
 
 ### Metrics (Dependent Variables)
