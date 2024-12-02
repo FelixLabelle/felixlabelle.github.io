@@ -56,6 +56,8 @@ Used JSON as the output's structure as it is easy to work with and validate usin
 This may well effect impact performance in a way that makes comparing models difficult, 
 but there likely would be no "fair" format. Here is a function which generates regex describing an example valid output,
 
+<details>
+<summary> Click to see code </summary>
 {% raw %}
 ```
 def generate_validation_regex(words):
@@ -74,6 +76,8 @@ def generate_validation_regex(words):
     return regex_str.strip()
 ```
 {% endraw %}
+</details>
+
 The gist of it is that words is generated from a fixed set and words can't repeat (hence the lookarounds, see back1->back15).
 
 #### Guided Generation
@@ -94,6 +98,8 @@ Used greedy decoding. Adding in different decoding approaches and additional hyp
 I used a very simple prompt and didn't tweak it. While models are brittle, messing around with prompts to improve performance is trivial IMO and falls outstide of the scope of these experiments.
 The prompt used was:
 
+<details>
+<summary> Click to see code </summary>
 {% raw %}
 ```
 You are an expert problem solver. You are doing the "connections" puzzle. You will receive 16 words.
@@ -116,6 +122,7 @@ Categories will always be more specific than "5-LETTER-WORDS," "NAMES" or "VERBS
 Each puzzle has exactly one solution. Watch out for words that seem to belong to multiple categories!
 ```
 {% endraw %}
+</details>
 
 ### Hyper-parameters (Independent Variables)
 
@@ -147,6 +154,8 @@ Different k-shot values were used.
 
 K-shot examples are picked at random from the connections dataset (or sample) excluding the current item and added afterwards.
 
+<details>
+<summary> Click to see code </summary>
 {% raw %}
 ```
 if k_shot > 0:
@@ -160,12 +169,17 @@ if k_shot > 0:
 		messages.append({"role" : "assistant", "content" : json.dumps(formatted_example)})
 ```
 {% endraw %}
+</details>
+
 #### Guided vs Unguided generation
 
 Tried both guided and unguided generation.
 `use_structured_prediction_options = [True, False]`
 
-This is implemented using Pydantic classes:
+This is implemented using Pydantic classes.
+
+<details>
+<summary> Click to see code </summary>
 ```
 AllowedWords = Enum('AllowedWords', {val: val for val in connections_words},type=str)
 
@@ -176,7 +190,7 @@ class Group(BaseModel):
 lass ConnectionSolution(BaseModel):
 		groups : conlist(Group,min_length=4,max_length=4)
 ```
-
+</details>
 
 ### Metrics (Dependent Variables)
 
