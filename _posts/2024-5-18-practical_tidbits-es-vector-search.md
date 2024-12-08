@@ -1,11 +1,11 @@
 # Practical Tidbits: ElasticSearch with custom Embeddings (Vectors) for Versions Greater than 7.6
 
-Recently I was deploying embeddings used for [mapping](https://felixlabelle.github.io/2023/12/18/text-similarity-tasks.html#mapping) as part of a platform we're developing for work. We decided to use ElasticSearch (ES), specifically version 8.13.2. The reasons were
+Recently I deployed embeddings on ElasticSearch for [mapping together two types of documents](https://felixlabelle.github.io/2023/12/18/text-similarity-tasks.html#mapping) [as part of a platform we're developing for work](https://www.pwc.com/us/en/products/risk-link.html). The reasons were
 1. We already had an instance of ES deployed
 2. There are existing data pipelines :)
-3. After some initial reading/research it looked feasible and relatively straightforward
+3. After some initial reading/research it looked relatively straightforward
 
-For point 3, there are two pieces of code I used as a reference. They both use ElasticSearch client to upload and query with custom embeddings
+There are two pieces of code I used as references. Both use ElasticSearch client to upload and query with custom embeddings
 1. [This blog post by Bachir (unsure about his last name) which uses SentenceTransformers](https://dzlab.github.io/nlp/2021/08/09/elasticsearch_bert/)
 2. [An example from ElasticSearch's lab team which uses TensorFlow](https://github.com/jtibshirani/text-embeddings)
 
@@ -15,7 +15,7 @@ I wrote code heavily inspired from these two sources, however every time I would
 RequestError: RequestError(400, 'search_phase_execution_exception', 'runtime error')
 ```
 
-Note that there can be multiple causes for this and you should look in the logs. However, in my case either ES or Kibana wasn't configured correctly and logs weren't available.
+Note that there can be multiple causes for this and you should look in the logs.
 
 After some research and experimenting, turns out there was a [breaking change in ES' script in version 7.6 of ES to how vector functions are written](https://www.elastic.co/guide/en/elasticsearch/reference/7.17/breaking-changes-7.6.html#_update_to_vector_function_signatures).  The only difference is that
 'doc' is no longer references in the search query (see example below for the difference).
