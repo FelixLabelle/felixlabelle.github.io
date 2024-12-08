@@ -78,6 +78,8 @@ more likely than not you will want to pick a threshold and n_gram_size first. Ea
 
 <details>
 <summary> Click to show code </summary>
+
+{% raw %}
 ```
 # pip install tqdm
 # pip install datasketch
@@ -267,6 +269,7 @@ if __name__ == "__main__":
     # Save results
     json.dump(results, open('results.json','w'),cls=NpEncoder)
 ```
+{% endraw %}
 </details>
 
 ### Modifications for Your Use Case
