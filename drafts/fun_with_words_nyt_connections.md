@@ -40,7 +40,7 @@ due to time constraints.
 
 #### Sample Size
 
-Some of the larger models, especially if not quantized, don't fit on a mobile RTX 4090 and overall runtimes can take up to a day **for a single experiment**.
+Some of the larger models, especially if not quantized, don't fit on a mobile RTX 4090 and overall run times can take up to a day **for a single experiment**.
 A sample size of 50 reduced max run times to 3-4 hours which made the experiments run in a reasonable amount of time.
 
 #### Seed
@@ -279,7 +279,7 @@ that aren't really accounted for within the context of this analysis (# params p
 Gwen).
 
 Before the experiments my expectation was that increasing any of these hyper-parameters would lead to improved performance. For that reason the most surprising trend was that K shot seems to have a very limited impact on performance. I'm not sure if this reflects
-a true trend or an issue with the experiment such as the setup or inappropriate statistical techniques. With more data an interesting analysis would be multivariable correlation analysis, for example if smaller models benefit more, if at all, from higher 
+a true trend or an issue with the experiment such as the setup or inappropriate statistical techniques. With more data an interesting analysis would be multi-variable correlation analysis, for example if smaller models benefit more, if at all, from higher 
 values of K in K-shot. Difficulty aware performance would also be interesting, are models only solving easy groups or is there no particular trend?
 
 <!-- TODO: Add difficulty analysis, given poor performance could-->
