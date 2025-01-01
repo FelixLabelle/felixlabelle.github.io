@@ -61,7 +61,7 @@ With this framing in mind, the first step is to identify questions we might want
 
 Second step is to find measures that are useful in answering these questions and validate them (see the road map below).
 Once these measures are validated rather than try a few attempts based on intuition we could down select using appropriate measures.
-Moreover these measures could be used to create better representations for a given problem. Let's say we know a given embedding can only represent 
+Moreover, these measures could be used to create better representations for a given problem. Let's say we know a given embedding can only represent 
 documents of length 512 for [Information Retrieval](https://en.wikipedia.org/wiki/Information_retrieval), we could do something like fuse multiple embeddings from different models or layers.
 
 #### Assumptions
@@ -103,7 +103,7 @@ This section is likely going to be a living list. I'm not as up to date with all
 	1. https://aclanthology.org/P18-2072/
 6. Meta learning literature (honestly I'm less familiar with this area of research. Need to read more here)
 7. Optimal Experiment literature (honestly I'm less familiar with this area of research. Need to read more here)
-
+8. [This paper primarily discusses the role of choice of metric and statistics on how strong apparent correlation is between # FLOPs and downstream performance.](https://arxiv.org/pdf/2406.04391). This paper gets rather close to characterization, but stops short of considering measures beyond pretraining FLOPs.
 ## Road Map for 2025
 
 Below is a roadmap that defines initial steps to develop characterization in NLP. The steps (for now) consist of:
