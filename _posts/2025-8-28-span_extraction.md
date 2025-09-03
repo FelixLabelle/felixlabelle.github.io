@@ -1,12 +1,12 @@
-# WIP: Using Landmarks Extract Spans with Prompting
+# WIP: Using Landmarks to Extract Spans with Prompting
 
 Over the last couple of years prompting and more generally text generation have become more common place in NLP applications. Instead of 
-bespoke tools that require training data, the default is to prompt. While
-this approach to NLP does present some advantages, such as tackling more use cases and ease of use. 
-However the open-endedness provided by text generation is not always necessary and can even be detrimental for certain applications:
-1. Open-endedness can make evaluation harder (i.e., less or no automated metrics)
-2. Cost of generating tokens (e.g., more variable)
-3. Size of models that are run (tied to cost, but this can have other side effects such as latency especially if self hosting)
+bespoke tools that require training data, the default is to use prompts and generate text. This approach to NLP does present some advantages,
+such as tackling more complex use cases and  ease of development. 
+However the open-endedness provided by text generation is not always necessary and can even be detrimental for certain applications.
+Reasons for this in my opinion are:
+1. Open-endedness can make evaluation harder (i.e., less or no automated metrics available)
+2. Cost of generating tokens and sizes of models needed for more complex tasks
 
 Sometimes tasks can be solved with more closed off solutions.
 Often when we get asks to "summarize" documents, the underlying ask is not a summary, but rather 
