@@ -1,4 +1,4 @@
-# Temperature, Tokens, and Long Tales (Tails)
+# Temperature, Tokens, and Long Tales/Tails
 
 ** NOTE: this post is in a draft state, it will be finalized tommorow. Currently checking for formatting issues **
 
