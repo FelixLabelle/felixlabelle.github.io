@@ -6,7 +6,7 @@ While my research interests primarily revolve around classification,
 my day job and the field more broadly (currently) revolve more around text generation. Recently
 at work we have deployed models on a platform that has a hard cutoff for run times to avoid
 run away processes hogging compute in production.
-A generation based tool we've developed has been getting timed out due to this practice.
+A generation based tool we've deployed in that environment has been getting timed out due to this practice.
 We have been experimenting with optimizations to avoid the time outs, primarily around breaking
 generations into multiple steps or reducing the tokens sent in or produced.
 
@@ -18,13 +18,14 @@ Two questions in particular came to mind:
 
 ## Proposed Mechanism(s) of Action
 
-This post won't really dive too deeply into the cause, but rather focus on whether or not such 
-a relationship can be observed. That being said, here are two potential explanations I came up with for the initial observation:
+This post won't really dive into the cause, but rather focus on whether or not such 
+a relationship can be observed. That being said, here are two potential explanations I came up with for the initial observation
+of higher temperatures corresponding to longer generations:
 1. diluting the probabilities (i.e., increasing the temperature) decreases the chance of predicting EOS, which makes sentences longer
-2. the paths explored at higher temperatures are just on average longer
+2. the paths explored at higher temperatures are on average longer
 
 Both of these causes would likely depend on the underlying model used and potentially the underlying task.
-Given the finite of compute available, the following experiments 
+Given the finite of compute available (to me), the following experiments 
 will do their best to account for those confounding variables as much as possible.
 
 ## Experiment
@@ -32,13 +33,13 @@ will do their best to account for those confounding variables as much as possibl
 To evaluate whether model behavior is correlation with temperature, a subset of [euclaise/writingprompts](https://huggingface.co/datasets/euclaise/WritingPromptsX) dataset was used.
 A total of 50 prompts about short stories were randomly sampled and used across multiple model, seed, and temperature configurations.
 
-
 Each prompt was generated with 20 different random seeds and 11 temperature settings, uniformly spaced between 0.0 and 2.0.
-The random seeds are meant to better understand how variable the pathes generated are for a given temperature.
-Generation length was capped at 2048 tokens. Sampling parameters were held fixed at top-p = 0.9 and top-k = 40. <!-- TODO: VERIFY THESE VALUES -->
+The random seeds are meant to better understand how variable the paths generated are for a given temperature.
+Generation length was capped at 2048 tokens, which is above the max length generated. Sampling parameters were not set.
 Three instruction-tuned models were used:
 llama-3.2-1b-instruct, llama-3.2-3b-instruct, and meta-llama-3-8b-instruct.
 
+The code used to run the experiments [can be found here](https://github.com/FelixLabelle/temperature_generation_length_experiments).
 This setup yielded approximately 33,000 generations in total. Results were aggregated by averaging generation length across seed–temperature combinations to examine trends across models and sampling conditions.
 Primarily two statistics were looked at
 1. Tokens generated
@@ -93,45 +94,24 @@ This difference is because the delta accounts for the model used to generate an 
 
 ### Correlation
 
-Correlation analysis supported these findings. Using Spearman rank correlation over group averages, temperature was negatively correlated with both mean length (ρ = –0.64) and standard deviation (ρ = –0.64). This indicates that as temperature increases, average completion length decreases while variability becomes more pronounced.
+Correlation analysis supported these findings. Using spearman rank correlation over group averages, temperature was negatively correlated with both mean length (ρ = –0.64) and standard deviation (ρ = 1.00). This indicates that as temperature increases, average completion length decreases while variability becomes more pronounced.
 
 
 ## Caveats
 
 These experiments are subject to several limitations.
 
-First, all results assume random sampling of prompts and rely on fixed sampling parameters—top-p and top-k values were held constant throughout. No tuning was performed to optimize these settings, which may affect comparability across temperatures or models.
+1. all results assume random sampling of prompts and rely on fixed sampling parameters—top-p and top-k values were held constant throughout. No tuning was performed to optimize these settings, which may affect comparability across temperatures or models.
+2. the analysis was conducted on a single task (story generation) using a single prompt template. Task- or prompt-specific effects could lead to different trends in other contexts.
+3. only a limited set of models was evaluated, all from the LLaMA-3 family. Model-specific factors such as architecture (e.g., mixture-of-experts vs. dense), size, or post-training objectives could produce different outcomes.
+4. the self-hosted LLM failed to generate outputs for about 3,000 runs of the 8B model. I'm currently investigating why. I don't think this effects the overall results, but it is a discrepancy worth noting.
+5. the study did not assess generation quality or task performance. The observed differences in length and variability therefore reflect behavioral rather than qualitative effects. If temperature is 
+an important factor to quality, then these results will be less interesting.
 
-Second, the analysis was conducted on a single task (story generation) using a single prompt template. Task- or prompt-specific effects could lead to different trends in other contexts.
-
-Third, only a limited set of models was evaluated, all from the LLaMA-3 family. Model-specific factors such as architecture (e.g., mixture-of-experts vs. dense), size, or post-training objectives could produce different outcomes.
-
-
-<!-- Mention failed runs -->
-
-
-Finally, the study did not assess generation quality or task performance directly. The observed differences in length and variability therefore reflect behavioral rather than qualitative effects.
-
-<!--
-Assumption of random sampling and  Note I'm assuming the use of random sampling and minimal tweaking for top-p or top-k
-Didn't mess around with top-p or top-k
-
-Didn't try different tasks, there may be task specific elements
-
-Limited number of models tried, could be model specific differences I missed
-	Different model families
-	Different (larger) sizes
-	Different pre-training/post training
-	MOE vs single model
-	
-Only tried one generative prompt, maybe there is an effect when using different prompts
-
-Didn't validate impact on performance 
--->
 
 ## Conclusion
 
-From an engineering standpoint, temperature affects not only model creativity and diversity, but also practical factors such as inference time and cost.
+From an engineering standpoint, these results seems to indicate that temperature effects practical factors such as inference time and cost.
 The observed reduction in average generation length at higher temperatures suggests potential efficiency gains, though the accompanying increase in variability may complicate latency estimates in production settings.
 
 More broadly, decoding hyperparameters can influence non-performance metrics in ways that are often overlooked. Estimating their impact on runtime and resource usage could be valuable for teams deploying large-scale generative systems.
