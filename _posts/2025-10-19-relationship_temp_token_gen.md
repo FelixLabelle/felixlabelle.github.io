@@ -1,7 +1,5 @@
 # Temperature, Tokens, and Long Tales/Tails
 
-** NOTE: this post is in a draft state, it will be finalized tommorow. Currently checking for formatting issues **
-
 While my research interests primarily revolve around classification,
 my day job and the field more broadly (currently) revolve more around text generation. Recently
 at work we have deployed models on a platform that has a hard cutoff for run times to avoid
