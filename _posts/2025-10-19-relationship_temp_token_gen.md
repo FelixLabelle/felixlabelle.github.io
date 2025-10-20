@@ -1,6 +1,6 @@
 # Temperature, Tokens, and Long Tales/Tails
 
-While my research interests primarily revolve around classification,
+While my research interests primarily revolve around characterization (and classification as a result),
 my day job and the field more broadly (currently) revolve more around text generation. Recently
 at work we have deployed models on a platform that has a hard cutoff for run times to avoid
 run away processes hogging compute in production.
@@ -28,20 +28,36 @@ will do their best to account for those confounding variables as much as possibl
 
 ## Experiment
 
-To evaluate whether model behavior is correlation with temperature, a subset of [euclaise/writingprompts](https://huggingface.co/datasets/euclaise/WritingPromptsX) dataset was used.
+To evaluate whether model behavior is correlated with temperature, a subset of [euclaise/writingprompts](https://huggingface.co/datasets/euclaise/WritingPromptsX) dataset was used.
 A total of 50 prompts about short stories were randomly sampled and used across multiple model, seed, and temperature configurations.
+The model was asked to write a short story based on that prompt with the following "system prompt":
 
-Each prompt was generated with 20 different random seeds and 11 temperature settings, uniformly spaced between 0.0 and 2.0.
+```
+    system_prompt = (
+        "You are a creative writing assistant. "
+        "Write a story using the following prompt."
+    )
+    data = {
+        "model": model,
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": prompt},
+        ],
+```
+
+The models are run using LM studio and exposed using an HTTP server. This choice was made out of expedience and to allow for use of an OpenAI
+completions interface, which is relatively standard as of writing. It is worth noting that [it appears possible
+to get deterministic results if a single slot is used when using llama.cpp](https://github.com/ggml-org/llama.cpp/issues/7381). Under the hood LM studio uses llama.cpp,hence the use of random seeds.
+
+Each response was generated with 20 different random seeds and 11 temperature settings, uniformly spaced between 0.0 and 2.0.
 The random seeds are meant to better understand how variable the paths generated are for a given temperature.
 Generation length was capped at 2048 tokens, which is above the max length generated. Sampling parameters were not set.
 Three instruction-tuned models were used:
 llama-3.2-1b-instruct, llama-3.2-3b-instruct, and meta-llama-3-8b-instruct.
 
 The code used to run the experiments [can be found here](https://github.com/FelixLabelle/temperature_generation_length_experiments).
-This setup yielded approximately 33,000 generations in total. Results were aggregated by averaging generation length across seed–temperature combinations to examine trends across models and sampling conditions.
-Primarily two statistics were looked at
-1. Tokens generated
-2. Delta tokens generated (difference between temperature 0 and temperature t for a given model M)
+This setup yielded approximately 33,000 generations in total. Note that
+results with temperature 0 were only run once, so there are less 33,000 results.
 
 ## Results and Analysis
 
@@ -49,6 +65,12 @@ To better understand whether or not there is a relationship between
 temperature generation two approaches are used
 1. Summary statistics
 2. Correlation
+
+Results were aggregated by averaging generation length across seed–temperature combinations to examine trends across models.
+Primarily two statistics were looked at
+1. Tokens generated
+2. Delta tokens generated 
+
 ### Summary Statistics
 
 To examine how sampling temperature affects generation behavior, outputs were grouped and averaged by temperature across all models and seeds.
@@ -70,7 +92,8 @@ The thing to note is that this table doesn't account for variability created by 
 |           1.8 |         518.234 |        257.689 |
 |           2   |         517.2   |        257.602 |
 
-
+The delta metric does account for that. The delta is the difference between the number of tokens generated between temperature 0 and temperature t for a given model M.
+The idea is that this helps isolate the change due to temperature and doesn't conflate other factors like the model (like the table above).
 Differences in mean token count (Δ tokens) exhibit the same overall trend (Table 2), confirming that higher temperatures generally yield shorter generations. Variability in length, however, increased slightly with temperature, suggesting that while typical completions get shorter, their range widens.
 This difference is because the delta accounts for the model used to generate an output.
 
@@ -92,27 +115,33 @@ This difference is because the delta accounts for the model used to generate an 
 
 ### Correlation
 
-Correlation analysis supported these findings. Using spearman rank correlation over group averages, temperature was negatively correlated with both mean length (ρ = –0.64) and standard deviation (ρ = 1.00). This indicates that as temperature increases, average completion length decreases while variability becomes more pronounced.
+Correlation analysis over the summary statistics seems mixed.
 
+Using spearman rank correlation over the delta averages and standard deviation values, temperature was negatively correlated with both mean length (ρ = –0.64) and standard deviation (ρ = 1.00). This indicates that as temperature increases, average completion length decreases while variability increases.
+I chose to use summary statistics instead of the raw data (as is typically done), because I wanted to understand how variability increased with temperature
+and wasn't sure how to do that using the raw data.
+
+However when measuring the correlation between delta and temperature directly, the correlation is very weak (-0.0364). It's unclear to me why there is such a discrepancy. My best guess is that the average obscures some information such as the model which may skew results.
 
 ## Caveats
 
 These experiments are subject to several limitations.
 
-1. all results assume random sampling of prompts and rely on fixed sampling parameters—top-p and top-k values were held constant throughout. No tuning was performed to optimize these settings, which may affect comparability across temperatures or models.
-2. the analysis was conducted on a single task (story generation) using a single prompt template. Task- or prompt-specific effects could lead to different trends in other contexts.
-3. only a limited set of models was evaluated, all from the LLaMA-3 family. Model-specific factors such as architecture (e.g., mixture-of-experts vs. dense), size, or post-training objectives could produce different outcomes.
-4. the self-hosted LLM failed to generate outputs for about 3,000 runs of the 8B model. I'm currently investigating why. I don't think this effects the overall results, but it is a discrepancy worth noting.
+1. all results assume random sampling of prompts and rely on fixed sampling parameters—top-p and top-k values were held constant throughout. No tuning was performed to optimize these settings, which may affect comparability across temperatures or models
+2. the analysis was conducted on a single task (story generation) using a single system prompt. Task or prompt specific effects could lead to different trends in other contexts
+3. only a limited set of models was evaluated, all from the LLaMA-3 family. Model-specific factors such as architecture (e.g., moe, dense, attention types), size (all the models used are sub 8b), model family (e.g., Qwen, OSS), or post-training objectives could produce different outcomes
+4. the experiment script crashed 3 times. As a consequence of that, the results from each run were stitched together manually. I see the expected number of results and have inspected for obvious errors (such as duplicates), but it is worth noting this happened and that this manipulation may have introduced errors
 5. the study did not assess generation quality or task performance. The observed differences in length and variability therefore reflect behavioral rather than qualitative effects. If temperature is 
-an important factor to quality, then these results will be less interesting.
-
+an important factor to quality, it will likely outweigh other practical considerations like time or cost
+6. I'm not a statistician and have doubts about the validity of the correlation analysis. I'm currently reading on how to best do an analysis of this type and would apply those techniques in the future
 
 ## Conclusion
 
-From an engineering standpoint, these results seems to indicate that temperature effects practical factors such as inference time and cost.
+From an engineering standpoint, these results seems to indicate that temperature effects practical factors such as inference time and cost when having smaller Llama 3 models tell short stories.
 The observed reduction in average generation length at higher temperatures suggests potential efficiency gains, though the accompanying increase in variability may complicate latency estimates in production settings.
 
 More broadly, decoding hyperparameters can influence non-performance metrics in ways that are often overlooked. Estimating their impact on runtime and resource usage could be valuable for teams deploying large-scale generative systems.
+Their impact on other aspects like the variability of quality for subjective tasks may also be worth investigating.
 
 To know if this holds, a larger scale study would need to be done addressing the caveats outlined above.
 In the meantime, given the limited scope of these experiments, practitioners should replicate similar analyses on their own data and workloads to assess how temperature and related settings affect their specific use cases. 
