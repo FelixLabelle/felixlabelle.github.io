@@ -9,16 +9,16 @@ We have been experimenting with optimizations to avoid the time outs, primarily 
 generations into multiple steps or reducing the tokens sent in or produced.
 
 Another engineer noticed that lowering the temperature reduced generation times over our 
-dev set. This made me wonder, is there a relationship between temperature and generation length.
+dev set. This made me wonder, is there a relationship between temperature and speed, more specifically because of generation length.
 Two questions in particular came to mind:
-1. What would be the mechanism of action for this?
+1. What would be the mechanism of action for longer sequence lengths?
 2. Can this be measured empirically beyond our relatively specific and small test set?
 
 ## Proposed Mechanism(s) of Action
 
-This post won't really dive into the cause, but rather focus on whether or not such 
-a relationship can be observed. That being said, here are two potential explanations I came up with for the initial observation
-of higher temperatures corresponding to longer generations:
+This post won't really dive into the cause of longer times, but rather focus on whether or not 
+a relationship between longer times and higher temperatures can be observed.Here are two potential explanations I came up with for the initial observation
+of higher temperatures corresponding to longer sequences:
 1. diluting the probabilities (i.e., increasing the temperature) decreases the chance of predicting EOS, which makes sentences longer
 2. the paths explored at higher temperatures are on average longer
 
@@ -135,6 +135,7 @@ These experiments are subject to several limitations.
 an important factor to quality, it will likely outweigh other practical considerations like time or cost
 6. I'm not a statistician and have doubts about the validity of the correlation analysis. I'm currently reading on how to best do an analysis of this type and would apply those techniques in the future
 7. The models refuse to generate outputs for certain prompts under certain conditions. It happened only over a couple of the prompts, but I don't think could have skewed results
+8. Generation length isn't the only cause of longer generation times. More generally I didn't measure the generation time which may vary independently of length due to inference settings not accounted for
 
 ## Conclusion
 
