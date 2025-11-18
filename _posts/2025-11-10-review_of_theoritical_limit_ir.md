@@ -49,7 +49,7 @@ The proof results in an inequality which ties all three of these properties toge
 the bounds are defined using $sign_rank$, which takes $rel$, projects it to $\{-1,1\}$ by doing $rek - 1$ and takes the rank of that such that $sign_rank rel = rank(2 rel - 1)$.
 In other words its still a binary except that zeros become -1 and 1 stays 1. 
 
-$$sign\_rank(rel)-1 <= rank\_rop(rel) = rank_rt rel <= rank_gt rel < sign_rank(rel)$$
+$$sign\\_rank(rel)-1 <= rank\\_rop(rel) = rank_rt rel <= rank_gt rel < sign_rank(rel)$$
 
 
 The long and short of it is that the sign rank matrix is the minimal size
