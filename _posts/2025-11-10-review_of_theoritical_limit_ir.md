@@ -37,19 +37,19 @@ $k$ refers to k elements used. It will be used in the the context of top-k
 
 With these definitions in hand, we move on to the proof itself. The paper lays out three properties of $rel$ that can be preserved and their relationship to $\hat{rel}$. These are:
 
-1. row wise order given by $rank\text{_}rop A$ ; this represents the smallest number of dimensions that preserves the ground truth order between embeddings
-2. local threshold rank given by $rank\text{_}rt A$; this is the smallest number of dimensions that preserves a certain distance $\tau_i$ for a given row $q$
-3. global threshold rank given by $rank\text{_}gt A$; this is the smallest number of dimensions that preserves a certain distance $\tau$ for all rows
+1. row wise order given by $rank-rop A$ ; this represents the smallest number of dimensions that preserves the ground truth order between embeddings
+2. local threshold rank given by $rank-rt A$; this is the smallest number of dimensions that preserves a certain distance $\tau_i$ for a given row $q$
+3. global threshold rank given by $rank-gt A$; this is the smallest number of dimensions that preserves a certain distance $\tau$ for all rows
 
 Property 1's utility is intuitive; what is the point of a ranking system that doesn't preserve order? As far as I can tell
 properties 2 and 3 don't have an intuitive purpose, especially since we don't define the values of $\tau$ they should hold for.
 From my understanding they are primarily used to establish a bound around the
 number of dimensions $d$ required to capture these properties i.e., construct the proof.
 The proof results in an inequality which ties all three of these properties together and finds bounds on them;
-the bounds are defined using $sign\text{_}rank$, which takes $rel$, projects it to $\{-1,1\}$ by doing $rel - 1$ and takes the rank of that such that $sign\text{_}rank rel = rank(2 rel - 1)$.
+the bounds are defined using $sign-rank$, which takes $rel$, projects it to $\{-1,1\}$ by doing $rel - 1$ and takes the rank of that such that $sign-rank rel = rank(2 rel - 1)$.
 In other words its still a binary except that zeros become -1 and 1 stays 1. 
 
-$$sign\text{_}rank(rel)-1 <= rank\text{_}rop(rel) = rank\text{_}rt rel <= rank\text{_}gt rel < sign\text{_}rank(rel)$$
+$$sign-rank(rel)-1 <= rank-rop(rel) = rank-rt rel <= rank-gt rel < sign-rank(rel)$$
 
 
 The long and short of it is that the sign rank matrix is the minimal size
