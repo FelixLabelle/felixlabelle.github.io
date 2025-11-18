@@ -69,11 +69,11 @@ The setup is that for an embedding of size $d$ they try to find the maximum size
 regardless of the underlying task. I won't go into specifics of how they do this yet.
 
 One question that naturally arises is how many queries should the dataset have and what should $rel$ look like?
-The solution the authors arrive at is that every single top-k pair of documents needs to be represented. This leads to an interesting issue, which is that there are $|C| choose $k$ queries. This leads to very large values of $|Q|$,
+The solution the authors arrive at is that every single top-k pair of documents needs to be represented. This leads to an interesting issue, which is that there are $|C| choose k$ queries. This leads to very large values of $|Q|$,
 as the authors point out. To minimize the combinatorial growth, they only evaluate small values of $d$ ([4,45]) and $k$ (2).
 Using the 41 values calculated, a 3rd degree polynomial is fit.
 
-$f(d) = −10.5322 + 4.0309 d + 0.0520 d^2 + 0.0037 d^3$
+$$f(d) = −10.5322 + 4.0309 d + 0.0520 d^2 + 0.0037 d^3$$
 
 Using this polynomial, the max top-2 an embedding is extrapolated. Values found are:
 
