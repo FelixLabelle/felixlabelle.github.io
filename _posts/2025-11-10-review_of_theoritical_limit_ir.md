@@ -25,39 +25,39 @@ Rather than go over the proof itself, the results will be presented and an inter
 A different notation from the paper will be used for simplicity and the terminology used, mathematical or otherwise 
 will be defined below. Note these definitions that will be used through out the post:
 
-\(C\) is the collection of documents \(c\). \(c\) is used to avoid confusion with dimension \(d\)
-\(Q\) are the corpus of queries \(q\)
-\(|X|\) refers to size of an array \(X\), concretely \(|C|\) is the number of documents, \(|Q|\) number of queries
-\(rel\) is a \(|C|x|Q|\) matrix representing the relationships \(st GT_ij = 1 iff a query and document are related 0 otherwise\)
-\(E_d\) is an embedding of the documents 
-\(E_q\) is an embedding of the queries
-\(\hat{rel}\) is an approximation of the ground truth relationships \(R\) where \(\hat{rel} = \cdot{E_d^T,E_q}\), in other words the result of cosine similarity between the output of an embedding model over the entire corpus
-\(rank\) refers to the rank of a matrix, ranking refers to act of ordering items, order will be used to refer to the order in which a models lists items
-\(k\) refers to k elements used. It will be used in the the context of top-k
+$C$ is the collection of documents $c$. $c$ is used to avoid confusion with dimension $d$
+$Q$ are the corpus of queries $q$
+$|X|$ refers to size of an array $X$, concretely $|C|$ is the number of documents, $|Q|$ number of queries
+$rel$ is a $|C|x|Q|$ matrix representing the relationships $st GT_ij = 1 iff a query and document are related 0 otherwise$
+$E_d$ is an embedding of the documents 
+$E_q$ is an embedding of the queries
+$\hat{rel}$ is an approximation of the ground truth relationships $R$ where $\hat{rel} = \cdot{E_d^T,E_q}$, in other words the result of cosine similarity between the output of an embedding model over the entire corpus
+$rank$ refers to the rank of a matrix, ranking refers to act of ordering items, order will be used to refer to the order in which a models lists items
+$k$ refers to k elements used. It will be used in the the context of top-k
 
-With these definitions in hand, we move on to the proof itself. The paper lays out three properties of \(rel\) that can be preserved and their relationship to \(\hat{rel}\). These are:
+With these definitions in hand, we move on to the proof itself. The paper lays out three properties of $rel$ that can be preserved and their relationship to $\hat{rel}$. These are:
 
-1. row wise order given by \(rank_rop A\) ; this represents the smallest number of dimensions that preserves the ground truth order between embeddings
-2. local threshold rank given by \(rank_rt A\); this is the smallest number of dimensions that preserves a certain distance \(\tau_i\) for a given row \(q\)
-3. global threshold rank given by \(rank_gt A\); this is the smallest number of dimensions that preserves a certain distance \(\tau\) for all rows
+1. row wise order given by $rank_rop A$ ; this represents the smallest number of dimensions that preserves the ground truth order between embeddings
+2. local threshold rank given by $rank_rt A$; this is the smallest number of dimensions that preserves a certain distance $\tau_i$ for a given row $q$
+3. global threshold rank given by $rank_gt A$; this is the smallest number of dimensions that preserves a certain distance $\tau$ for all rows
 
 Property 1's utility is intuitive, what is the point of a ranking system that doesn't preserve order? As far as I can tell
-properties 2 and 3 don't have an intuitive purpose, especially since we don't define the values of \(\tau\) they should hold for.
+properties 2 and 3 don't have an intuitive purpose, especially since we don't define the values of $\tau$ they should hold for.
 From my understanding they are primarily used to establish a bound around the
-number of dimensions \(d\) required to capture these properties i.e., construct the proof.
+number of dimensions $d$ required to capture these properties i.e., construct the proof.
 The proof results in an inequality which ties all three of these properties together and finds bounds on them;
-the bounds are defined using \(sign_rank\), which takes \(rel\), projects it to \(\{-1,1\}\) by doing \(rek - 1\) and takes the rank of that such that \(sign_rank rel = rank(2 rel - 1)\).
+the bounds are defined using $sign_rank$, which takes $rel$, projects it to $\{-1,1\}$ by doing $rek - 1$ and takes the rank of that such that $sign_rank rel = rank(2 rel - 1)$.
 In other words its still a binary except that zeros become -1 and 1 stays 1. 
 
-$$sign-rank(rel)-1 <= rank_rop(rel) = rank_rt rel <= rank_gt rel < sign_rank(rel)$$
+$$signrank(rel)-1 <= rank_rop(rel) = rank_rt rel <= rank_gt rel < sign_rank(rel)$$
 
 
 The long and short of it is that the sign rank matrix is the minimal size
 required (look at both ends of the inequality) to preserve the 3 properties listed above.
 The authors note that this means the minimum number of dimensions is task specific, more precisely that it is 
-based solely on \)rel\(. I think there are two primary limitations for practical use that need to be further explored
+based solely on $rel$. I think there are two primary limitations for practical use that need to be further explored
 1. Computational limitations of Rank. The authors briefly touch on this in the relevant works section, but essentially using Sign Rank (as of date of publishing) is a non-starter
-2. Effect of changes to \)rel\( w.r.t. to \)d\( required, ideally in practice. I.E., does the minimum number of dimensions required change dramatically between p(y|x) shifts (e.g., new data, new split, new domain)
+2. Effect of changes to $rel$ w.r.t. to $d$ required, ideally in practice. I.E., does the minimum number of dimensions required change dramatically between p(y|x) shifts (e.g., new data, new split, new domain)
 
 Spoiler, we will look at these two issues in the additional experiments. For now we will look 
 at the method the authors propose to use to find the bound instead of sign rank.
@@ -65,15 +65,15 @@ at the method the authors propose to use to find the bound instead of sign rank.
 ## Empirical Bounds on Performance
 
 Since sign rank can't be computed practically speaking, the authors propose an alternative method to establish an empirical bound they call "free embedding" optimization.
-The setup is that for an embedding of size \)d\( they try to find the maximum size of \)|C|\( they can represent
+The setup is that for an embedding of size $d$ they try to find the maximum size of $|C|$ they can represent
 regardless of the underlying task. I won't go into specifics of how they do this yet.
 
-One question that naturally arises is how many queries should the dataset have and what should \)rel\( look like?
-The solution the authors arrive at is that every single top-k pair of documents needs to be represented. This leads to an interesting issue, which is that there are \)|C| choose \(k\) queries. This leads to very large values of \(|Q|\),
-as the authors point out. To minimize the combinatorial growth, they only evaluate small values of \(d\) ([4,45]) and \(k\) (2).
+One question that naturally arises is how many queries should the dataset have and what should $rel$ look like?
+The solution the authors arrive at is that every single top-k pair of documents needs to be represented. This leads to an interesting issue, which is that there are $|C| choose $k$ queries. This leads to very large values of $|Q|$,
+as the authors point out. To minimize the combinatorial growth, they only evaluate small values of $d$ ([4,45]) and $k$ (2).
 Using the 41 values calculated, a 3rd degree polynomial is fit.
 
-$$f(d) = −10.5322 + 4.0309 d + 0.0520 d^2 + 0.0037 d^3$$
+$f(d) = −10.5322 + 4.0309 d + 0.0520 d^2 + 0.0037 d^3$
 
 Using this polynomial, the max top-2 an embedding is extrapolated. Values found are:
 
@@ -137,15 +137,15 @@ to be more conservative, may produce variable results.
 
 #### Difficult to Interpret Hyperparameter
 
-The top-k value introduced to pick the threshold that don't always have a clear analog in practice. How do we even choose \)k\( for a given problem? For user
+The top-k value introduced to pick the threshold that don't always have a clear analog in practice. How do we even choose $k$ for a given problem? For user
 facing applications this might be easier, since we can suppose people won't look at more than 2,5,10 results. What about pipelines with multiple steps?
 What about RAG, which top-k is suitable then? This might seem like a nit pick, but when your entire method for estimating the minimum dimension is reliant on a hyper-parameter it is important to 
-have an answer to that question of what \)k\( value to pick.
+have an answer to that question of what $k$ value to pick.
 
 #### Query/Corpus Relationship
 
 This design choice to have as many  principled, but seems like a poor one for two reasons:
-1. It makes finding these bounds difficult computationally to estimate bounds, because \)|C| choose k\( grows very quickly for large values of \)|C|\( and \)k\(
+1. It makes finding these bounds difficult computationally to estimate bounds, because $|C| choose k$ grows very quickly for large values of $|C|$ and $k$
 2. It's unclear how close this bound is to typical IR query document relationships, at least as captured in datasets. Is this bound close regardless of the task used, or much higher?
 
 The number of dimensions found by this method should be higher given its likely harder to fit than other combinations of queries.
@@ -166,7 +166,7 @@ An experiment to understand how  initial conditions impact the dimension d value
 While this empirical bound is interesting, as discussed it doesn't touch on what we can expect in practice.
 This section is billed as practical results, however it primarily serves to introduce a new dataset, LIMIT. The rationale is that current datasets don't have a 
 high enough ratio of queries to documents and therefore can't completely test the combinations possible.
-Sections 5.4 and figure 6 demonstrate that having a denser \)rel\( matrix makes the task more difficult for 
+Sections 5.4 and figure 6 demonstrate that having a denser $rel$ matrix makes the task more difficult for 
 recall @ 100. 
 
 LIMIT simulates the query document relationship by creating user profiles consisting of "attributes"
@@ -200,7 +200,7 @@ so the results shown are unsuprising and could be explained by experimental desi
 ### Missed Opportunities
 
 Overall the practical section of the paper felt like a missed opportunity to actually to show the theorem 
-does (or doesn't) show up in practice. The authors even have [code](https://github.com/google-deepmind/limit/blob/main/code/free_embedding_experiment.py#L363-L493) that could be used to test the \)rel\( of real datasets using the free
+does (or doesn't) show up in practice. The authors even have [code](https://github.com/google-deepmind/limit/blob/main/code/free_embedding_experiment.py#L363-L493) that could be used to test the $rel$ of real datasets using the free
 embedding method, more on that later. IMO this would provide a more realistic 
 representation of the bounds. You could even use this method on your own dataset to get an idea of the scale.
 Instead the section's focus is on showing how difficult LIMIT is for neural models and justifying the design choices used to make it that way.
@@ -240,11 +240,11 @@ Because the results of each run are stored separately in the same JSON file, you
 
 Again, like above all the results are the same across seeds. However its unclear to me if this is due to an issue on my end or the code.
 
-### Effects of Changing \)rel\(
+### Effects of Changing $rel$
 
-The reliance on \)rels\( begs some questions about how changes in \)rel\( effect the dimensions required. These
+The reliance on $rels$ begs some questions about how changes in $rel$ effect the dimensions required. These
 changes could come from 3 places IMO
-1. the task itself, i.e., shifts of \)p(y|c,q)\( which is the functioning capturing the ground truth relationship.
+1. the task itself, i.e., shifts of $p(y|c,q)$ which is the functioning capturing the ground truth relationship.
 2. new relationships, e.g., when new queries or documents are added
 3. transfer between splits or domains
 
@@ -268,7 +268,7 @@ frankly my knowledge. It seems like the rank can be computed using [SVD](https:/
 the [structural rank](https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.csgraph.structural_rank.html).
 
 To get an idea of how variable these bounds might be an experiment was run. Across 4 orders of magnitude
-of \)rel\( and query size. Initialized a \)C\(, \)Q\(, \)rel\( randomly. Compute both exact rank and structural rank.
+of $rel$ and query size. Initialized a $C$, $Q$, $rel$ randomly. Compute both exact rank and structural rank.
 Compute k+1 ranks using k-fold validation, one rank for the entire dataset and one for each "training" fold.
 We then compute the distribution of the deltas and normalize with respect to the true rank value (percentage error).
 This creates an error bar giving us an idea of how much the true dimensionality required is compared to just the 
@@ -312,8 +312,8 @@ of the free optimization method is unclear.
 
 Assuming that we could reliably compute bounds and that they are accurate, could we 
 use synthetic approaches to estimate the true dimension needed for a problem given 
-a small sample. Lets say I only have 100 examples, would it be possible to synthetically grow \)rel\( and get a good estimate of the 
-true dimensionality required for a given task? Essentially figure out if can we approximate p(y|x) and if that gives us reliable estimates on \)d$.
+a small sample. Lets say I only have 100 examples, would it be possible to synthetically grow $rel$ and get a good estimate of the 
+true dimensionality required for a given task? Essentially figure out if can we approximate p(y|x) and if that gives us reliable estimates on $d$.
 
 ### Alternative Uses of Single Embeddings
 
