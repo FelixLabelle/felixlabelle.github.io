@@ -19,7 +19,7 @@ experiments I would have liked to see and analysis on future work.
 4. experiments I'd like to see
 5. implications and future directions
 
-## Theoretical bounds
+## Theoretical Bounds
 
 Rather than go over the proof itself, the results will be presented and an interpretation of their implications provided.
 A different notation from the paper will be used for simplicity and the terminology used, mathematical or otherwise 
@@ -28,7 +28,7 @@ will be defined below. Note these definitions that will be used through out the 
 $C$ is the collection of documents $c$. $c$ is used to avoid confusion with dimension $d$
 $Q$ are the corpus of queries $q$
 $|X|$ refers to size of an array $X$, concretely $|C|$ is the number of documents, $|Q|$ number of queries
-$rel$ is a $|C|x|Q|$ matrix representing the relationships $st GT_ij = 1 iff a query and document are related 0 otherwise$
+$rel$ is a $|C|x|Q|$ matrix representing the relationships st $GT_(ij) = 1$ iff a query and document are related otherwise $GT_ij = 0$
 $E_d$ is an embedding of the documents 
 $E_q$ is an embedding of the queries
 $\hat{rel}$ is an approximation of the ground truth relationships $R$ where $\hat{rel} = \cdot{E_d^T,E_q}$, in other words the result of cosine similarity between the output of an embedding model over the entire corpus
@@ -41,7 +41,7 @@ With these definitions in hand, we move on to the proof itself. The paper lays o
 2. local threshold rank given by $rank_rt A$; this is the smallest number of dimensions that preserves a certain distance $\tau_i$ for a given row $q$
 3. global threshold rank given by $rank_gt A$; this is the smallest number of dimensions that preserves a certain distance $\tau$ for all rows
 
-Property 1's utility is intuitive, what is the point of a ranking system that doesn't preserve order? As far as I can tell
+Property 1's utility is intuitive; what is the point of a ranking system that doesn't preserve order? As far as I can tell
 properties 2 and 3 don't have an intuitive purpose, especially since we don't define the values of $\tau$ they should hold for.
 From my understanding they are primarily used to establish a bound around the
 number of dimensions $d$ required to capture these properties i.e., construct the proof.
@@ -49,14 +49,14 @@ The proof results in an inequality which ties all three of these properties toge
 the bounds are defined using $sign_rank$, which takes $rel$, projects it to $\{-1,1\}$ by doing $rek - 1$ and takes the rank of that such that $sign_rank rel = rank(2 rel - 1)$.
 In other words its still a binary except that zeros become -1 and 1 stays 1. 
 
-$$signrank(rel)-1 <= rank_rop(rel) = rank_rt rel <= rank_gt rel < sign_rank(rel)$$
+$$sign\_rank(rel)-1 <= rank\_rop(rel) = rank_rt rel <= rank_gt rel < sign_rank(rel)$$
 
 
 The long and short of it is that the sign rank matrix is the minimal size
 required (look at both ends of the inequality) to preserve the 3 properties listed above.
 The authors note that this means the minimum number of dimensions is task specific, more precisely that it is 
 based solely on $rel$. I think there are two primary limitations for practical use that need to be further explored
-1. Computational limitations of Rank. The authors briefly touch on this in the relevant works section, but essentially using Sign Rank (as of date of publishing) is a non-starter
+1. Sign rank is difficult to compute. The authors briefly touch on this in the related works section, but essentially using Sign Rank (as of date of publishing) is a non-starter
 2. Effect of changes to $rel$ w.r.t. to $d$ required, ideally in practice. I.E., does the minimum number of dimensions required change dramatically between p(y|x) shifts (e.g., new data, new split, new domain)
 
 Spoiler, we will look at these two issues in the additional experiments. For now we will look 
