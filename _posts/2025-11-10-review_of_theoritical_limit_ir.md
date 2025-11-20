@@ -8,11 +8,11 @@ or at the very least well designed to be of use to practitioners.
 
 Concurrently [this video critique of the same paper by Yannic Kilcher](https://www.youtube.com/watch?v=zKohTkN0Fyk) came out.
 While there is overlap, the video has significantly more background on IR (which the reader is assumed to have for this post) and doesn't dive as deeply into the methodological issues
-of the paper. Moreover, this blog will detail additional experiments and suggestions for how this 
+of the paper IMO. Moreover, this blog will detail additional experiments and suggestions for how this 
 work could be used in the future. I recommend watching the video first, especially for people unfamiliar with IR or who are newer to field.
 
 Now on to the show. The blog will have the following structure. First discuss the paper's 3 contributions, followed by 
-experiments I would have liked to see and analysis on future work.
+experiments I would have liked to see and finishing up with an analysis on future directions based on this paper.
 1. proposing theoretical bounds on the minimal number of dimensions needed 
 2. measuring empirical bound on dimensions needed for specific properties
 3. practical experiments
@@ -26,17 +26,24 @@ A different notation from the paper will be used for simplicity and the terminol
 will be defined below. Note these definitions that will be used through out the post:
 
 $C$ is the collection of documents $c$. $c$ is used to avoid confusion with dimension $d$
+
 $Q$ are the corpus of queries $q$
+
 $|X|$ refers to size of an array $X$, concretely $|C|$ is the number of documents, $|Q|$ number of queries
+
 $rel$ is a $|C|x|Q|$ matrix representing the relationships st $GT_(ij) = 1$ iff a query and document are related otherwise $GT_ij = 0$
+
 $E_d$ is an embedding of the documents 
+
 $E_q$ is an embedding of the queries
+
 $\hat{rel}$ is an approximation of the ground truth relationships $R$ where $\hat{rel} = \cdot{E_d^T,E_q}$, in other words the result of cosine similarity between the output of an embedding model over the entire corpus
+
 $rank$ refers to the rank of a matrix, ranking refers to act of ordering items, order will be used to refer to the order in which a models lists items
+
 $k$ refers to k elements used. It will be used in the the context of top-k
 
 With these definitions in hand, we move on to the proof itself. The paper lays out three properties of $rel$ that can be preserved and their relationship to $\hat{rel}$. These are:
-
 1. row wise order given by $rankrop A$ ; this represents the smallest number of dimensions that preserves the ground truth order between embeddings
 2. local threshold rank given by $rankrt A$; this is the smallest number of dimensions that preserves a certain distance $\tau_i$ for a given row $q$
 3. global threshold rank given by $rankgt A$; this is the smallest number of dimensions that preserves a certain distance $\tau$ for all rows
@@ -69,7 +76,7 @@ The setup is that for an embedding of size $d$ they try to find the maximum size
 regardless of the underlying task. I won't go into specifics of how they do this yet.
 
 One question that naturally arises is how many queries should the dataset have and what should $rel$ look like?
-The solution the authors arrive at is that every single top-k pair of documents needs to be represented. This leads to an interesting issue, which is that there are $|C| choose k$ queries. This leads to very large values of $|Q|$,
+The solution the authors arrive at is that every single top-k pair of documents needs to be represented. This leads to an interesting issue, which is that there are $\binom{|C|}{k}$ queries. This leads to very large values of $|Q|$,
 as the authors point out. To minimize the combinatorial growth, they only evaluate small values of $d$ ([4,45]) and $k$ (2).
 Using the 41 values calculated, a 3rd degree polynomial is fit.
 
@@ -125,6 +132,7 @@ to estimate a very small number of items. I don't if this trend would hold for h
 experimental results seem to hover around the plot line.
 
 ![Results](/images/original_polynomial_plot.png)
+![Grouping taxonomy proposed by Samadarshi et al.](/images/nyt_taxonomy_similarity.png)
 
 ![Results](/images/original_polynomial_plot_closeup.png)
 
@@ -145,7 +153,7 @@ have an answer to that question of what $k$ value to pick.
 #### Query/Corpus Relationship
 
 This design choice to have as many  principled, but seems like a poor one for two reasons:
-1. It makes finding these bounds difficult computationally to estimate bounds, because $|C| choose k$ grows very quickly for large values of $|C|$ and $k$
+1. It makes finding these bounds difficult computationally to estimate bounds, because $\binom{|C|}{k}$ grows very quickly for large values of $|C|$ and $k$
 2. It's unclear how close this bound is to typical IR query document relationships, at least as captured in datasets. Is this bound close regardless of the task used, or much higher?
 
 The number of dimensions found by this method should be higher given its likely harder to fit than other combinations of queries.
@@ -186,7 +194,7 @@ There are three design choices that make the value of this claim questionable IM
 2. Removal of hypernyms in the attributes benefits models that don't capture the semantics of words like the baseline (e.g., BM-25)
 3. The domain used is unlike any the models. 5.3 aims to show this isn't the case, but 
 the experiment uses a split with new attributes. So it's fundamentally a different distribution
-of the dataset. It would not be shocking if the model couldn't learn p(y|x) given how different p(x) is. This isn't accounted for in their explanation.
+of the dataset. It would not be shocking if the model couldn't learn $p(y|x)$ given how different p(x) is. This isn't accounted for in their explanation.
 
 For me the best example of this is that the colbert results are quite a bit better than single embeddings, but still lower than BM-25.
 Given how Colbert is said to transfer domains better <!-- TODO: Include citation -->
@@ -212,6 +220,20 @@ This section is primarily focused on applying theory to real world and understan
 of such a theory. I still feel like the following experiments 
 don't go far enough, but they are a step in the right direction.
 
+As a general note I've attempted these experiments, but haven't gotten results that make sense.
+The top-k accuracy appears fixed for specific datasets. For example nfcorpus always gets 5% top-2 accuracy, scifact 90% top-2 accuracy
+regardless of the number of dimensions or other factors.
+
+I used WSL with an rtx 4090 and WSL with rtx 3090 (which is supported experimentally),
+and got similar issues. I can't tell if the lack of correct results is due to
+1. Hardware/environment configuration
+2. Misuse of the original code (the majority of the code used is copied from the paper)
+3. Issues in the underlying code
+
+
+I've spent a fair amount of time debugging the code (2) and suspect that issue is likely 1 or 3.
+I have limited access to supported hardware and configurations, so its hard to debug 1.
+For now I've given up, but will try again later.
 
 ### Estimates of minimum dimensions over real datasets  
 
@@ -226,11 +248,10 @@ For each dataset, the code <!-- todo: include github link -->
 2. Loads documents, queries and relevance judgments (`qrels`).  
 3. Converts the sparse relevance information into a binary ground truth map required by the optimizer.  
 4. Calls `optimize_embeddings` with the current dimensionality together with a set of hyperparameters (learning rate, temperature, early‑stopping settings, etc.) that are pulled from `DEFAULT_EXPERIMENT_PARAMS`.  
+5. Calculate top-k accuracy
+6. Find the elbow where performance stops increasing for a given number of dimensions
 
-The function returns the accuracy with which the top-k (k=2 in this case) was found.
-
-While I was able to get this code to run, its unclear if I did something wrong or there is fundamentally an issue with this code or approach.
-All the results, regardless of dimension, converged to a specific accuracy for a given dataset.
+The function returns the accuracy with which the top-k (k=2 in this case) was found. The 
 
 ### Variability of the method over multiple runs  
 
