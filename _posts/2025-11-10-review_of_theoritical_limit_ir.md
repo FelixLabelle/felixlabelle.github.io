@@ -27,17 +27,11 @@ will be defined below. Note these definitions that will be used through out the 
 
 $C$ is the collection of documents $c$. $c$ is used to avoid confusion with dimension $d$
 
-$Q$ are the corpus of queries $q$
+$Q$ is the queries $q$
 
 $|X|$ refers to size of an array $X$, concretely $|C|$ is the number of documents, $|Q|$ number of queries
 
 $rel$ is a $|C|x|Q|$ matrix representing the relationships st $GT_(ij) = 1$ iff a query and document are related otherwise $GT_ij = 0$
-
-$E_d$ is an embedding of the documents 
-
-$E_q$ is an embedding of the queries
-
-$\hat{rel}$ is an approximation of the ground truth relationships $R$ where $\hat{rel} = \cdot{E_d^T,E_q}$, in other words the result of cosine similarity between the output of an embedding model over the entire corpus
 
 $rank$ refers to the rank of a matrix, ranking refers to act of ordering items, order will be used to refer to the order in which a models lists items
 
@@ -66,18 +60,28 @@ based solely on $rel$. I think there are two primary limitations for practical u
 1. Sign rank is difficult to compute. The authors briefly touch on this in the related works section, but essentially using Sign Rank (as of date of publishing) is a non-starter
 2. Effect of changes to $rel$ w.r.t. to $d$ required, ideally in practice. I.E., does the minimum number of dimensions required change dramatically between p(y|x) shifts (e.g., new data, new split, new domain)
 
-Spoiler, we will look at these two issues in the additional experiments. For now we will look 
-at the method the authors propose to use to find the bound instead of sign rank.
+The effect of the changes will be discussed later. For now we will look at the method the authors propose to use to find the bound instead of sign rank.
 
 ## Empirical Bounds on Performance
 
-Since sign rank can't be computed practically speaking, the authors propose an alternative method to establish an empirical bound they call "free embedding" optimization.
+Since sign rank is difficult to compute, the authors propose an alternative method to establish an empirical bound they call "free embedding" optimization.
 The setup is that for an embedding of size $d$ they try to find the maximum size of $|C|$ they can represent
-regardless of the underlying task. I won't go into specifics of how they do this yet.
+regardless of the underlying task.
+
+The method avoids using text representations altogether. Rather it directly learns $rel$.
+$|Q| + |C|$ embeddings are initialized randomly. Then the embeddings are optimized to fit 
+$rel$. Direct optimization removes a confounding variable and establishes an upper bound on performance.
+The way performance is evaluated is top-k accuracy, i.e., what percentage of the top-k items are correct.
+The idea is that for a dimension $d$, we can only represent $|C|$ documents so they need a method for finding 
+how many documents can be represented. For a given $d$, the authors finding the largest $|C|$ that can be represented 
+with it.
 
 One question that naturally arises is how many queries should the dataset have and what should $rel$ look like?
+In other words what dataset should we use to establish these bounds?
 The solution the authors arrive at is that every single top-k pair of documents needs to be represented. This leads to an interesting issue, which is that there are $\binom{|C|}{k}$ queries. This leads to very large values of $|Q|$,
-as the authors point out. To minimize the combinatorial growth, they only evaluate small values of $d$ ([4,45]) and $k$ (2).
+as the authors point out. 
+
+For this reason the authors only evaluate small values of $d$ ([4,45]) and $k$ (2).
 Using the 41 values calculated, a 3rd degree polynomial is fit.
 
 $$f(d) = −10.5322 + 4.0309 d + 0.0520 d^2 + 0.0037 d^3$$
@@ -92,15 +96,11 @@ Using this polynomial, the max top-2 an embedding is extrapolated. Values found 
 | 3,072      | 107M   |
 | 4,096      | 250M   |
 
+These results establish the crux of the author's argument that embeddings are unable to represent enough data.
+Looking a bit deeper, it's a bit unclear if this is the case. The following subsections will 
+discuss methodological and experimental design issues.
 
 ### Methodological Issues
-
-#### Moving Goal Posts
-
-The paper focuses on "web-scale" data and this term is not well-defined in the paper or in general. Moreover, the scales tackled according to their estimates are 
-rather large (250M documents with the correct top 2 with 4096 embeddings, upper bound of 350M). Even "just" 250M documents will cover most use cases assuming the value is correct (see below).
-The statement that single vector embeddings are limited, based on these estimates, feels a bit contrived.
-
 
 #### Curve Fitting and Extrapolation
 
@@ -109,7 +109,7 @@ and, as far as I can tell, don't really justify their use of a 3rd order polynom
 so at least in the range over which it is defined there won't be drops at higher values.
 
 More notably the authors also don't provide any  error bars for their data. 
-Below is an example of what their estimate would look like with error bars using both 
+Below is an example of what their estimate would look like with error bars and the 95% CI using both 
 standard deviation and bootstrapping.
 
 ![Results](/images/error_bars_for_embedding_limits_polynomial.png)
@@ -124,7 +124,7 @@ The bounds around performance using 95% CI are rather large, nearly 50%. Below i
 | 3072  | 107,062,547.63 | 63,930,717.43 | 150,194,377.84 | 6,684,349.74 | 158,563,955.12 |
 | 4096  | 253,473,998.20 | 150,616,883.99 | 356,331,112.41 | 14,319,291.91 | 376,219,318.51 |
 
-In short, the authors estimates could be seriously off, even assuming there are no other issues. Interestingly the bootstrap
+In short, the authors' estimates could be seriously off, even assuming there are no other issues. Interestingly the bootstrap
 estimate seems to have a preference for more conservative number of items. I suspect
 that is due to the fact that the larger # of dims are underestimated i.e., we can see that at the tail end of the original data, the points are above the curve plotted
 by the polynomial. So when bootstrapping, samples that are primarily composed of smaller values tend 
@@ -137,18 +137,30 @@ experimental results seem to hover around the plot line.
 ![Results](/images/original_polynomial_plot_closeup.png)
 
 
+#### Moving Goal Posts
+
+Even if we take the extrapolated estimates at face value, the paper focuses on "web-scale" data and this term is not well-defined in the paper or in general. Moreover, the scales tackled according to their estimates are 
+rather large (250M documents with the correct top 2 with 4096 embeddings). Even "just" 250M documents will cover most use cases assuming the value is correct.
+The statement that single vector embeddings are limited, based on these estimates, feels a bit contrived. In my personal experience, it's rare to have 
+datasets with more than a few million items that need to be mapped or retrieved. 
+
+
 ### Experimental Design Issues
 
 The methodological issues are just the cherry on top. There are more fundamental issues that make even the adjusted estimates unlikely to be
-correlated to real world performance. The following subsections explore the issues that, IMO, make it harder to apply this method, distort the bounds
-to be more conservative, may produce variable results.
+representative of real world performance.
 
-#### Difficult to Interpret Hyperparameter
+#### Top-k Hyperparameter
 
-The top-k value introduced to pick the threshold that don't always have a clear analog in practice. How do we even choose $k$ for a given problem? For user
+The top-k value is critical in establishing bounds on dimensionality required. A $k$ of 2 is used, but it's unclear how other values would have 
+effected these estimates. What number of documents can be represented for $k$ of 5,10,20 which are common values for which to report performance metrics in 
+information retrieval.
+
+The bigger issue is that it don't always have a clear analog in practice. How do we even choose $k$ for a given problem? For user
 facing applications this might be easier, since we can suppose people won't look at more than 2,5,10 results. What about pipelines with multiple steps?
-What about RAG, which top-k is suitable then? This might seem like a nit pick, but when your entire method for estimating the minimum dimension is reliant on a hyper-parameter it is important to 
-have an answer to that question of what $k$ value to pick.
+What about RAG, which top-k is suitable then? This might seem like a nit pick, but when your entire method for estimating the minimum dimension required for a given 
+corpus is reliant on a hyper-parameter it is important to have an answer to that question of what $k$ value to pick.
+
 
 #### Query/Corpus Relationship
 
@@ -159,20 +171,18 @@ This design choice to have as many  principled, but seems like a poor one for tw
 The number of dimensions found by this method should be higher given its likely harder to fit than other combinations of queries.
 Section 5.4 and Figure 6 seem to indicate that this would be the case, although those experiments are used in a different context.
 
-#### Variability Based on Initial Conditions
+### Variability Based on Initial Conditions
 
-<!-- NOUR PLEASE REVIEW ME -->
-Although optimization methods like ADAM are less susceptible to start conditions and getting stuck in local minima <!-- TODO: 1. verify this is true, 2. citation -->
-this is a real concern. Initial conditions will impact how many dimensions are found. THe authors don't appear to account for 
-this, simply running experiments once. Running multiple experiments and providing variability of number of items found would have been a good starting point.
-Maybe overfitting prevents this, but not sure.
-An experiment to understand how  initial conditions impact the dimension d value found would be important.
+Optimization-based methods, as far as I'm aware, are not guaranteed to [convergeto a global optimum](https://www.arxiv.org/abs/2510.03613) or [consistent solutions based on the initialization](https://proceedings.mlr.press/v28/sutskever13.html)
+The paper appears to run each free-embedding experiment only once per configuration of $d$. Without repeated runs over different initializations, how can we be sure the number of dimensions found is accurate even if we are overfitting?
+A straightforward solution would be to repeat each optimization several times with different seeds and report the variance (or a confidence interval) on the maximum $|C|$ obtained.
+This validate the robustness of the empirical bound and account for any issues arising from optimization settings.
 
 
 ## Practical Performance
 
-While this empirical bound is interesting, as discussed it doesn't touch on what we can expect in practice.
-This section is billed as practical results, however it primarily serves to introduce a new dataset, LIMIT. The rationale is that current datasets don't have a 
+While the empirical bound is interesting, as discussed it doesn't touch on what we can expect in practice.
+The practical section of the paper primarily serves to introduce a new dataset, LIMIT. The rationale is that current datasets don't have a 
 high enough ratio of queries to documents and therefore can't completely test the combinations possible.
 Sections 5.4 and figure 6 demonstrate that having a denser $rel$ matrix makes the task more difficult for 
 recall @ 100. 
@@ -194,16 +204,16 @@ There are three design choices that make the value of this claim questionable IM
 2. Removal of hypernyms in the attributes benefits models that don't capture the semantics of words like the baseline (e.g., BM-25)
 3. The domain used is unlike any the models. 5.3 aims to show this isn't the case, but 
 the experiment uses a split with new attributes. So it's fundamentally a different distribution
-of the dataset. It would not be shocking if the model couldn't learn $p(y|x)$ given how different p(x) is. This isn't accounted for in their explanation.
+of the dataset. It would not be shocking if the model couldn't learn $p(y|x)$ given how different $p(x)$ is. This isn't accounted for in their explanation.
 
-For me the best example of this is that the colbert results are quite a bit better than single embeddings, but still lower than BM-25.
-Given how Colbert is said to transfer domains better <!-- TODO: Include citation -->
+For me the best example of this is that the [ColBERT](https://arxiv.org/abs/2004.12832) results are quite a bit better than single embeddings, but still lower than BM-25.
+Given how Colbert is said to transfer domains better (I've heard this on twitter from the late interactions fans, but don't have a citation atm)
 I think difference can be accounted for by the three reasons listed above.
 
 Beyond the construction of the dataset, how its evaluated is very odd. The authors aim to show 
 that dimensional is a limiting factor. To this end they use a combination of different models, including about half that aren't trained with MRL.
 Moreover those that are trained with MRL aren't trained to go as low as they do, <!-- todo: get a citation for this if correct -->
-so the results shown are unsuprising and could be explained by experimental design issues.
+so the results shown are unsurprising and could be explained by experimental design issues.
 
 ### Missed Opportunities
 
@@ -217,14 +227,13 @@ Instead the section's focus is on showing how difficult LIMIT is for neural mode
 
 The theorem is a really good starting point for further work and I think there are a couple directions in which to take it.
 This section is primarily focused on applying theory to real world and understanding the practical implications/ utility
-of such a theory. I still feel like the following experiments 
-don't go far enough, but they are a step in the right direction.
+of such a theory.
 
-As a general note I've attempted these experiments, but haven't gotten results that make sense.
+I've attempted these experiments, but haven't gotten results that make sense.
 The top-k accuracy appears fixed for specific datasets. For example nfcorpus always gets 5% top-2 accuracy, scifact 90% top-2 accuracy
 regardless of the number of dimensions or other factors.
 
-I used WSL with an rtx 4090 and WSL with rtx 3090 (which is supported experimentally),
+I used WSL with an rtx 4090 and WSL with rtx 3090 (WSL is supported experimentally),
 and got similar issues. I can't tell if the lack of correct results is due to
 1. Hardware/environment configuration
 2. Misuse of the original code (the majority of the code used is copied from the paper)
@@ -232,53 +241,59 @@ and got similar issues. I can't tell if the lack of correct results is due to
 
 
 I've spent a fair amount of time debugging the code (2) and suspect that issue is likely 1 or 3.
-I have limited access to supported hardware and configurations, so its hard to debug 1.
+I have limited access to supported hardware and configurations, so its hard to debug 1 atm.
 For now I've given up, but will try again later.
 
 ### Estimates of minimum dimensions over real datasets  
 
-To estimate the minimum dimensions required over a real dataset,
- a systematic grid search across **six embedding sizes** (`64, 128, 256, 512, 1024, 2048`) for two BEIR datasets:
+I'd like to see, for a given top-k accuracy, an estimate the minimum dimensions required over a real dataset.
+For simplicity smaller datasets could be used to start.
+
+I propose a grid search across **six embedding sizes** (`64, 128, 256, 512, 1024, 2048`) for two BEIR datasets:
 1. nfcorpus
 2. scifact
 
-For each dataset, the code <!-- todo: include github link -->
+For each dataset, the code would go something like this:
 
-1. Downloads and unpacks the benchmark data.  
-2. Loads documents, queries and relevance judgments (`qrels`).  
-3. Converts the sparse relevance information into a binary ground truth map required by the optimizer.  
-4. Calls `optimize_embeddings` with the current dimensionality together with a set of hyperparameters (learning rate, temperature, early‑stopping settings, etc.) that are pulled from `DEFAULT_EXPERIMENT_PARAMS`.  
+1. Download and unpack the benchmark data.  
+2. Load documents, queries and relevance judgments (`qrels`).  
+3. Convert the sparse relevance information into a binary ground truth map required by the optimizer.  
+4. Call `optimize_embeddings` (the authors original code) with the current dimensionality together with a set of hyperparameters (learning rate, temperature, early‑stopping settings, etc.) that are pulled from `DEFAULT_EXPERIMENT_PARAMS`.  
 5. Calculate top-k accuracy
 6. Find the elbow where performance stops increasing for a given number of dimensions
 
-The function returns the accuracy with which the top-k (k=2 in this case) was found. The 
+This method is a bit rudimentary, but would give an idea of where higher dimensions stops improving performance.
 
 ### Variability of the method over multiple runs  
 
-To assess how sensitive the Adam based optimization is to random initialization, the script repeats every `(dataset, dim)` experiment **three times** using distinct seeds (`0`, `42`, `13044`).  
-Each seed is passed directly into `optimize_embeddings`, which (presumably) seeds JAX’s PRNG and the Adam optimizer state.
-Because the results of each run are stored separately in the same JSON file, you end up with a replicated set of scores for every configuration.  
+In parallel to estimating minima, it would make sense to check how much initial settings effect results.
 
-Again, like above all the results are the same across seeds. However its unclear to me if this is due to an issue on my end or the code.
+We would add another variable. Each combination of `(dataset, dim)` would be rerun **three times** using distinct seeds (I had picked `0`, `42`, `13044`).  
+Each seed is passed directly into `optimize_embeddings`, which (presumably) seeds JAX’s PRNG and the Adam optimizer state.
+
+If the results for top-k accuracy vary across seeds, then it would be clear an aggregation method would be necessary to account for this discrepancy.
 
 ### Effects of Changing $rel$
 
-The reliance on $rels$ begs some questions about how changes in $rel$ effect the dimensions required. These
-changes could come from 3 places IMO
-1. the task itself, i.e., shifts of $p(y|c,q)$ which is the functioning capturing the ground truth relationship.
-2. new relationships, e.g., when new queries or documents are added
-3. transfer between splits or domains
-
-In other words, how does increasing the number of documents or queries drastically change the dimensions required to capture a given problem?
+The relationship between $d$ and $rels$ begs some questions about how changes in $rel$ effect the dimensions required.
+How does increasing the number of documents or queries drastically change the dimensions required to capture a given problem?
 Moreover, how do we guarantee that the relationships in the training data and the minimum dimensionality
 we determined with them are adequately high? If we need a dataset that is representative to 
 accurately compute minimum dimensions that might be harder to use. Especially given that new, unseen queries
 are likely a relatively frequent occurrence given the long tailed nature of queries.
 
-<!-- text to flush out, descrube ab experu -->
+These changes could arise from 3 sources IMO
+1. the task itself, i.e., shifts of $p(y|c,q)$ which is the functioning capturing the ground truth relationship.
+2. new relationships, e.g., when new queries or documents are added
+3. transfer between splits or domains
 
-Try 2, 5,10,20 fold to see how variable this is. The reason is that this will give us an idea 
-for tasks where the train corpus is much smaller than real corpus how these bounds might generalize
+Practically each of these scenarios could be done
+1. use k-fold and see how variable $d$ is across splits
+2. see how $d$ changes when splits (e.g., train, val, dev) are combined (which should be more representative of the overall task)
+3. There are two sub-experiments
+	1. using the existing splits and measuring the difference between $d$ across splits separately
+	2. the same task across different domains
+<!-- text to flush out, descrube ab experu -->
 
 <!--
 ### Could Sign Rank Approximations be used
@@ -333,7 +348,7 @@ of the free optimization method is unclear.
 
 Assuming that we could reliably compute bounds and that they are accurate, could we 
 use synthetic approaches to estimate the true dimension needed for a problem given 
-a small sample. Lets say I only have 100 examples, would it be possible to synthetically grow $rel$ and get a good estimate of the 
+a small sample? Lets say I only have 100 examples, would it be possible to synthetically grow $rel$ and get a good estimate of the 
 true dimensionality required for a given task? Essentially figure out if can we approximate p(y|x) and if that gives us reliable estimates on $d$.
 
 ### Alternative Uses of Single Embeddings
