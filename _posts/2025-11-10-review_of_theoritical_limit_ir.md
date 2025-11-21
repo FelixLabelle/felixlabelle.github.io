@@ -33,7 +33,13 @@ $|X|$ refers to size of an array $X$, concretely $|C|$ is the number of document
 
 $rel$ is a $|C|x|Q|$ matrix representing the relationships st $GT_(ij) = 1$ iff a query and document are related otherwise $GT_ij = 0$
 
+$e_q$ and $e_c$ are respectively vectors that capture the queries and documents
+
+$\hat{rel}$ is the approximation of $rel$ given by $e_q$ and $e_c$
+
 $rank$ refers to the rank of a matrix, ranking refers to act of ordering items, order will be used to refer to the order in which a models lists items
+
+$signrank$ is the rank of a sign matrix $M$ where $M$ is a binary matrix in the range $\{-1,1\}$
 
 $k$ refers to k elements used. It will be used in the the context of top-k
 
@@ -43,38 +49,35 @@ With these definitions in hand, we move on to the proof itself. The paper lays o
 3. global threshold rank given by $rankgt A$; this is the smallest number of dimensions that preserves a certain distance $\tau$ for all rows
 
 Property 1's utility is intuitive; what is the point of a ranking system that doesn't preserve order? As far as I can tell
-properties 2 and 3 don't have an intuitive purpose, especially since we don't define the values of $\tau$ they should hold for.
-From my understanding they are primarily used to establish a bound around the
-number of dimensions $d$ required to capture these properties i.e., construct the proof.
-The proof results in an inequality which ties all three of these properties together and finds bounds on them;
-the bounds are defined using $signrank$, which takes $rel$, projects it to $\{-1,1\}$ by doing $rel - 1$ and takes the rank of that such that $signrank(rel) = rank(2 rel - 1)$.
-In other words its still a binary except that zeros become -1 and 1 stays 1. 
+properties 2 and 3 don't have a purpose besides being used establish a bound around the $d$ dimensions required.
+The proof is an inequality which ties all three of these properties together and finds a bounds defined using $signrank$ over $rel$, i.e., $signrank(rel) = rank(2 rel - 1)$.
+
 
 $$signrank(rel)-1 <= rankrop(rel) = rankrt(rel) <= rankgt rel < signrank(rel)$$
 
-
 The long and short of it is that the sign rank matrix is the minimal size
-required (look at both ends of the inequality) to preserve the 3 properties listed above.
-The authors note that this means the minimum number of dimensions is task specific, more precisely that it is 
-based solely on $rel$. I think there are two primary limitations for practical use that need to be further explored
+required (look at both ends of the inequality) to preserve the 3 properties listed above, namely order preservation.
+I think there are two primary limitations for practical use that need to be further explored
 1. Sign rank is difficult to compute. The authors briefly touch on this in the related works section, but essentially using Sign Rank (as of date of publishing) is a non-starter
 2. Effect of changes to $rel$ w.r.t. to $d$ required, ideally in practice. I.E., does the minimum number of dimensions required change dramatically between p(y|x) shifts (e.g., new data, new split, new domain)
 
-The effect of the changes will be discussed later. For now we will look at the method the authors propose to use to find the bound instead of sign rank.
+The effect of the changes to $rel$ be discussed later. For now we will look at the method the authors propose to use to estimate a bound instead of sign rank.
 
 ## Empirical Bounds on Performance
 
-Since sign rank is difficult to compute, the authors propose an alternative method to establish an empirical bound they call "free embedding" optimization.
+Since sign rank is difficult to compute, the authors propose using "free embedding optimization".
 The setup is that for an embedding of size $d$ they try to find the maximum size of $|C|$ they can represent
 regardless of the underlying task.
 
-The method avoids using text representations altogether. Rather it directly learns $rel$.
+The method avoids using text representations altogether. Rather the goal is to directly embeddings $e_c$ and $e_q$ that can approximate $rel$.
+Direct optimization removes a confounding variable and establishes an upper bound on performance.
 $|Q| + |C|$ embeddings are initialized randomly. Then the embeddings are optimized to fit 
-$rel$. Direct optimization removes a confounding variable and establishes an upper bound on performance.
-The way performance is evaluated is top-k accuracy, i.e., what percentage of the top-k items are correct.
+$rel$.
+Performance is evaluated with top-k accuracy, i.e., what percentage of the top-k items are correct.
 The idea is that for a dimension $d$, we can only represent $|C|$ documents so they need a method for finding 
 how many documents can be represented. For a given $d$, the authors finding the largest $|C|$ that can be represented 
-with it.
+with it. They increase $|C|$ until the top-k accuracy decreases and this serves to indicate the upper limit a given 
+size of embedding can represent.
 
 One question that naturally arises is how many queries should the dataset have and what should $rel$ look like?
 In other words what dataset should we use to establish these bounds?
@@ -86,7 +89,7 @@ Using the 41 values calculated, a 3rd degree polynomial is fit.
 
 $$f(d) = −10.5322 + 4.0309 d + 0.0520 d^2 + 0.0037 d^3$$
 
-Using this polynomial, the max top-2 an embedding is extrapolated. Values found are:
+Using this polynomial, the max top-2 an embedding of a given $d$ can represent is extrapolated. Values found are:
 
 | num dimensions | num items |
 |------------|---------|
@@ -96,9 +99,9 @@ Using this polynomial, the max top-2 an embedding is extrapolated. Values found 
 | 3,072      | 107M   |
 | 4,096      | 250M   |
 
-These results establish the crux of the author's argument that embeddings are unable to represent enough data.
+These results establish the crux of the author's argument that embeddings are unable to represent enough data for "web-scale data".
 Looking a bit deeper, it's a bit unclear if this is the case. The following subsections will 
-discuss methodological and experimental design issues.
+discuss methodological and experimental design issues with this approach.
 
 ### Methodological Issues
 
@@ -108,7 +111,7 @@ The use of extrapolation [can be fraught with issues](https://www.xkcd.com/1007/
 and, as far as I can tell, don't really justify their use of a 3rd order polynomial. That being said there is only one real zero and it does increase monotonically,
 so at least in the range over which it is defined there won't be drops at higher values.
 
-More notably the authors also don't provide any  error bars for their data. 
+More notably the authors don't provide any  error bars for their data. 
 Below is an example of what their estimate would look like with error bars and the 95% CI using both 
 standard deviation and bootstrapping.
 
@@ -152,7 +155,7 @@ representative of real world performance.
 
 #### Top-k Hyperparameter
 
-The top-k value is critical in establishing bounds on dimensionality required. A $k$ of 2 is used, but it's unclear how other values would have 
+The top-k value is critical in establishing bounds on $d$. A $k$ of 2 is used, but it's unclear how other values would have 
 effected these estimates. What number of documents can be represented for $k$ of 5,10,20 which are common values for which to report performance metrics in 
 information retrieval.
 
@@ -164,19 +167,20 @@ corpus is reliant on a hyper-parameter it is important to have an answer to that
 
 #### Query/Corpus Relationship
 
-This design choice to have as many  principled, but seems like a poor one for two reasons:
+This design choice to have as many queries may seem principled, but in practice is a poor one for two reasons:
 1. It makes finding these bounds difficult computationally to estimate bounds, because $\binom{|C|}{k}$ grows very quickly for large values of $|C|$ and $k$
 2. It's unclear how close this bound is to typical IR query document relationships, at least as captured in datasets. Is this bound close regardless of the task used, or much higher?
 
 The number of dimensions found by this method should be higher given its likely harder to fit than other combinations of queries.
 Section 5.4 and Figure 6 seem to indicate that this would be the case, although those experiments are used in a different context.
+I personally believe this casts doubt on the results as being valid. Likely these bounds are rather conservative assuming no other issues.
 
 ### Variability Based on Initial Conditions
 
 Optimization-based methods, as far as I'm aware, are not guaranteed to [convergeto a global optimum](https://www.arxiv.org/abs/2510.03613) or [consistent solutions based on the initialization](https://proceedings.mlr.press/v28/sutskever13.html)
 The paper appears to run each free-embedding experiment only once per configuration of $d$. Without repeated runs over different initializations, how can we be sure the number of dimensions found is accurate even if we are overfitting?
 A straightforward solution would be to repeat each optimization several times with different seeds and report the variance (or a confidence interval) on the maximum $|C|$ obtained.
-This validate the robustness of the empirical bound and account for any issues arising from optimization settings.
+This would validate the robustness of the empirical bound and account for any issues arising from optimization settings.
 
 
 ## Practical Performance
@@ -188,9 +192,9 @@ Sections 5.4 and figure 6 demonstrate that having a denser $rel$ matrix makes th
 recall @ 100. 
 
 LIMIT simulates the query document relationship by creating user profiles consisting of "attributes"
-and simple few word queries. Attributes are properties such as "likes peperonni pizza".
+and simple few word queries. Attributes are statements such as "likes peperonni pizza".
 Users are limited to 50 attributes per profile and queries ask for one attribute at a time so it is a relatively
-straightforward task. The attributes and subsequent profiles are generated by gemini 2.5, checked for dupes,and hypernyms (we'll circle back to this).
+straightforward task. The attributes and subsequent profiles are generated by Gemini 2.5, checked for dupes,and hypernyms (we'll circle back to this).
 
 My critiques of this section are 2 fold
 1. LIMIT is artificially, and unnecessarily, difficult
@@ -210,10 +214,9 @@ For me the best example of this is that the [ColBERT](https://arxiv.org/abs/2004
 Given how Colbert is said to transfer domains better (I've heard this on twitter from the late interactions fans, but don't have a citation atm)
 I think difference can be accounted for by the three reasons listed above.
 
-Beyond the construction of the dataset, how its evaluated is very odd. The authors aim to show 
-that dimensional is a limiting factor. To this end they use a combination of different models, including about half that aren't trained with MRL.
-Moreover those that are trained with MRL aren't trained to go as low as they do, <!-- todo: get a citation for this if correct -->
-so the results shown are unsurprising and could be explained by experimental design issues.
+Another oddity worth mentioning is that about half the embedding models used aren't trained with MRL, which 
+for a paper trying to show how limited dimensionality can cause issues seems odd considering this could be 
+a confounding variable. The authors acknowledge this, but don't really explain why this is a valid design choice IMO.
 
 ### Missed Opportunities
 
@@ -229,11 +232,11 @@ The theorem is a really good starting point for further work and I think there a
 This section is primarily focused on applying theory to real world and understanding the practical implications/ utility
 of such a theory.
 
-I've attempted these experiments, but haven't gotten results that make sense.
+I've attempted the following experiments, but haven't gotten results that make sense.
 The top-k accuracy appears fixed for specific datasets. For example nfcorpus always gets 5% top-2 accuracy, scifact 90% top-2 accuracy
 regardless of the number of dimensions or other factors.
 
-I used WSL with an rtx 4090 and WSL with rtx 3090 (WSL is supported experimentally),
+I used WSL with an rtx 4090 and WSL with rtx 3090 (WSL is supported experimentally by jax),
 and got similar issues. I can't tell if the lack of correct results is due to
 1. Hardware/environment configuration
 2. Misuse of the original code (the majority of the code used is copied from the paper)
@@ -248,7 +251,6 @@ For now I've given up, but will try again later.
 
 I'd like to see, for a given top-k accuracy, an estimate the minimum dimensions required over a real dataset.
 For simplicity smaller datasets could be used to start.
-
 I propose a grid search across **six embedding sizes** (`64, 128, 256, 512, 1024, 2048`) for two BEIR datasets:
 1. nfcorpus
 2. scifact
@@ -275,19 +277,19 @@ If the results for top-k accuracy vary across seeds, then it would be clear an a
 
 ### Effects of Changing $rel$
 
-The relationship between $d$ and $rels$ begs some questions about how changes in $rel$ effect the dimensions required.
+The relationship between the bound on $d$ and $rels$ begs some questions about how changes in $rel$ effect the dimensions required.
 How does increasing the number of documents or queries drastically change the dimensions required to capture a given problem?
 Moreover, how do we guarantee that the relationships in the training data and the minimum dimensionality
-we determined with them are adequately high? If we need a dataset that is representative to 
+we determined with them are adequately high to do the task on held out data? If we need a dataset that is representative to 
 accurately compute minimum dimensions that might be harder to use. Especially given that new, unseen queries
 are likely a relatively frequent occurrence given the long tailed nature of queries.
 
-These changes could arise from 3 sources IMO
+These shifts naturally occur in 3 ways IMO:
 1. the task itself, i.e., shifts of $p(y|c,q)$ which is the functioning capturing the ground truth relationship.
 2. new relationships, e.g., when new queries or documents are added
 3. transfer between splits or domains
 
-Practically each of these scenarios could be done
+Practically each of these can be tested in the following ways:
 1. use k-fold and see how variable $d$ is across splits
 2. see how $d$ changes when splits (e.g., train, val, dev) are combined (which should be more representative of the overall task)
 3. There are two sub-experiments
@@ -342,7 +344,7 @@ If we can compute close bounds on dimensions, we can get insights on how efficie
 I'm unaware of the other uses of sign rank, but if this theory is correct a generalized and efficient version of sign rank 
 that works over large sparse matrices would be very important to IR practitioners. It would allow us to quickly estimate 
 rank. This falls outside of my area of expertise, but would be of immense value to practitioners given the reliability
-of the free optimization method is unclear.
+of the free optimization method is unclear at the moment.
 
 ### Synthetic Estimates of Dimensionality
 
@@ -374,9 +376,8 @@ Lets say we decide to rely primarily on rerankers, there are still practice reas
 What if instead of using single vectors to get the top-k directly, I just used them as rerankers?
 Instead of getting the top-k correct, all that matters in that case top-k in some larger k'.
 This would open the door to  use single vectors as efficient representations instead and just 
-size them so we have guarantees on k'. In a sense this already happens with some optimizations 
-for multi-vector methods like plaid <!-- todo: verify and add a citation -->. In that case,
-extending this theory to give bounds on what sized k' we can get the top-k results in would be interesting.
+size them so we have guarantees on k'. For example getting the top-k in k' could be highly valuable 
+and let us estimate worst case costs for rerankers.
 
 ## Closing Remarks
 
@@ -393,7 +394,7 @@ For now keep using empirical measurements of performance over your data and eval
 any potential alternatives like multi-vector or sparse representations.
 
 
-## References
+## Uncited References
 
 https://news.ycombinator.com/item?id=45068986
 https://arxiv.org/abs/2407.15462
