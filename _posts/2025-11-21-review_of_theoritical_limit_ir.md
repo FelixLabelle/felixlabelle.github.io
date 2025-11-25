@@ -396,7 +396,7 @@ any potential alternatives like multi-vector or sparse representations.
 
 ## Uncited References
 
-https://news.ycombinator.com/item?id=45068986
-https://arxiv.org/abs/2407.15462
-https://arxiv.org/abs/2407.13218
-https://arxiv.org/pdf/2205.13147
+* https://news.ycombinator.com/item?id=45068986
+* https://arxiv.org/abs/2407.15462
+* https://arxiv.org/abs/2407.13218
+* https://arxiv.org/pdf/2205.13147
