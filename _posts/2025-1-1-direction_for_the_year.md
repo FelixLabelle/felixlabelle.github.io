@@ -118,3 +118,11 @@ Below is a roadmap that defines initial steps to develop characterization in NLP
 Characterization is an attempt to make NLP projects more predictable, efficient, and effective.
 By focusing on measurable properties and how those translate to technical capabilities, the gap between abstract model performance and real-world engineering needs can be bridged.
 The hope is that this groundwork will help create practical tools and frameworks that engineers can rely on when designing NLP systems.
+
+
+<!--
+papers I need to read
+https://arxiv.org/abs/1811.04871
+https://arxiv.org/pdf/2210.07352
+https://arxiv.org/pdf/2201.10474
+-->
