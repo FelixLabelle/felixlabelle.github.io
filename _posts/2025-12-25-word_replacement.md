@@ -1,26 +1,27 @@
 # WIP: LLMs for Text Normalization (i.e., Domain Adaptation)
 
-A perennial task at work is [mapping](https://felixlabelle.github.io/2023/12/18/text-similarity-tasks.html#mapping).
-We've used mapping models across multiple areas of regulation and clients.
-When models are deployed to a new combination of regulation, client or both there is a drop in performance.
-There are ways of over coming this like additional training, but ideally models would generalize regardless of the source of the text.
+A perennial task at work is [mapping](https://felixlabelle.github.io/2023/12/18/text-similarity-tasks.html#mapping),
+specifically [risk to control mapping](https://secureframe.com/blog/control-mapping).
+We've used mapping models across multiple areas of regulation, clients and tasks.
+Even when models are deployed over the same task, new combinations of regulation, client or both there is a drop in performance.
+There are ways of over coming this like additional training, but ideally models would work as well regardless of the source of the text.
 While there may be multiple causes for the drop, like slight differences in definitions of what is considered a good match is across clients (i.e., p(y|x)),
 IMO this likely isn't the primary culprit.
 Transfers between clients or areas of regulation often result in new language that the underlying model has limited or no exposure to.
-Examples include word choice changes or acronyms that only make sense given external context. These issues are common in regulatory text and client-specific documents.
+Examples of this include word choice changes or acronyms that only make sense given external context. These issues are common in regulatory text and client-specific documents.
 Even for mappings with the same annotators, there can be drops for new "areas" (i.e., its a safe assumption p(y|x) is the same, p(x) is the only change.
 
-One approach to solve this would be model focused (e.g., domain adaptation). However this blog post will be focused on a data-centric approach, 
+One approach to solve this would be model focused (i.e., training to make the model more robust to domain). However this blog post will be focused on a data-centric approach, 
 specifically normalization.
 
 ## Description of approach
 
-While doing error analysis on mapping examples, the number of acronyms, spelling errors, and offhanded words in different languages present in the data stood out.
+While doing error analysis on mapping tasks, the number of acronyms, spelling errors, and offhanded words in different languages present in examples that performed poorly stood out.
+Success in this context is measured by the ability to improve generalization to new "domains" (as defined by area of regulation and client).
 A while ago I attended a colloquium where one of the authors of [DictBERT](https://arxiv.org/abs/2208.00635) presented their work. Assuming 
 that rare or otherwise unknown words are a cause of performance drops,
 a word replacement approach like DictBERT seemed like a viable approach especially on the smaller encoder models we typically use for mapping.
 
-Success is measured by the ability to improve generalization to new "domains" (as defined by area of regulation and client).
 
 A replacement based normalization approach provides a handful of advantages:
 1. it can be modified for new clients
@@ -33,22 +34,22 @@ There are some downsides, primarily
 3. it isn't entirely clear what words should be replaced (DictBERT uses a heuristic to select words to be replaced)
 
 Issue 2 is a fundamental limitation of a replacement based approach, but there are ways to mitigate this risk.
-Issue 1 can be addressed using models, prompting specifically.
+Issue 1 can be addressed using models, prompting specifically and issue 3 can be figured out through trial and error.
 
-### Implementation
 
-Text normalization is achieved using a pipeline. It is modular so that individual pieces can be swapped out or evaluated independently.
-There are two phases, training and inference.
-
-#### Architecture
-
+### Architecture
+A pipeline is used to normalize text.
 There are three primary components to the pipeline:
  
 1. Tokenizer. It produces word-like tokens and basic offsets used later for insertion. It's a simple regex that returns the word and word position in indices
 2. Replacement dictionary. It contains replacements and additional metadata about them (e.g., ambiguity)
 3. Downstream model which uses the replaced text (typically an encoder like BERT)
 
-#### Training 
+### Training 
+
+The pipeline has a "training phase" which is required to select the words that need to be replaced and the proper replacements.
+The current flow of the training is as follows:
+<!--
 1. Tokenization
 2. Create Metadata for labeling. Store context in which tokens are found. Keep surrounding W words in either direction (currently set to 10, based on subjective judgment).
 2. Select word to replace. Applies heuristics or thresholds to decide which tokens are candidates for normalization. Currently just using term frequency and document frequency thresholds. Remove words that occur in more than 50% of documents and account for more than 1% of tokens.
@@ -58,7 +59,7 @@ There are three primary components to the pipeline:
 	3. replacement
 	4. a justification for the values above
 4. Post processing of generation. Checking that replacements don't themselves have rare words in them (recursion)
-
+-->
 <pre class="mermaid">
 flowchart TD
     %% Training pipeline
@@ -74,13 +75,18 @@ flowchart TD
     class Tok,Meta,Sel,Gen,Post,Ins,Out stage;
 </pre>
  
+There is still room for improvement within this flow. The next steps are integrating annotation to verify the model outputs (e.g., replacement, ambiguity).
+More over the post-processing step does not currently handle recursion (rare words within the replacement of a rare word).
 
 #### Inference
 
+After the replacements have been learned, the next step is to apply that dictionary on the downstream task. The flow looks as follows:
+<!--
 1. Tokenization
 2. Replacement. Replaces the original token with the generated output while preserving the rest of the text. There may be a better way, but 
 the replacements are done backwards, inserting the replacement spans in the text.
 3. Pass the text to the downstream task
+-->
 
 <pre class="mermaid">
 flowchart TD
@@ -96,9 +102,10 @@ flowchart TD
 ## Preliminary Results
 
 The results are over proprietary data, so the underlying data can't be shared. At a high-level it appears to work,
-but the effect is very weak. Multiple splits are used to better understand the effects of the data. 
+but the effect is small. Multiple splits are used to better understand the effects of the data. 
+The downstream mapping model is a BERT-based architecture, with a fair number of variants.
 
-The method was used in two settings
+Word replacement was used in two settings
 1. held out splits (4) with different sets with models trained on unexpanded data
 2. held out splits (4) with different sets with models trained on expanded data
 
@@ -106,26 +113,20 @@ For the word replacement only words that occur in more than 2 documents and more
 About 22k rare words were found. GPT-4o was used to generate the word replacements.  About ~1/3 didn't have any replacements so approximately 3.5% of words were replaced on the held out splits. Based on a subjective analysis 
 this was due to ambiguous examples or examples without enough examples to determine their meaning. 
 
-The downstream mapping model is a BERT-based architecture, with a fair number of variants.
 
-In setting 1 the replacement leads to 1–2% improvement on domain-specific models. Interestingly commercial models don't improve. Need to do more fine-grained analysis to understand why.
-
-In setting 2 further improvements of 2–4% are had.
-
+In setting 1 the replacement leads to 1–2% improvement of recall@k for k=[1,2,5,10,20] on domain-specific models. Interestingly commercial models don't improve. Need to do more fine-grained analysis to understand why. In setting 2 further improvements of 2–4% are had.
+This is likely due to the fact that the post-training similarity has increased.
 
 ### Caveats
 
-Bluntly the data I work with is weird and I highly doubt that these gains are universal. The task is rather different than most IR or even similarity tasks.
+Bluntly the data I work with is unique and I highly doubt that these gains are universal. The task is rather different than most IR or even similarity tasks.
 Moreover the data often has a fair number of rare acronyms. Your mileage will vary and currently I have no method of knowing when this approach is worthwhile
 for your datasets.
 
-The pipeline needs to be monitored. Although not mentioned, statistics on the number of ambiguous outputs are tracked. Moreover ambiguous 
-or replacements that aren't predicted are not used.
-
 ## Suspected Mechanisms (Hypotheses as to Why this Works)
 
-I think there are multiple reasons replacement should/could work. I'm positing them here so future experiments can be focused
-on determining why and when normalization through word replacement might work. In specific there are 3 causes I suspect.
+I think there are multiple reasons replacement should/could work. I'm proposing 3 mechanisms of action here so future experiments can be focused
+on determining why and when normalization through word replacement might work.
 
 ### Distributional shift
 <!-- TODO: Review from here on out -->
@@ -136,7 +137,7 @@ but GPT-4o has a much larger corpus and likely a different distribution.
 
 Measuring the shift created by word replacement requires a definition of domain. For our purposes we'll use token distribution, since this makes it easier to shape the output. For open-source models with training data available we can measure token distrbution
 and use logit biases to make replacements more similar to the pre-training corpus. Similarity to pre-train data has been shown to [improve performance across a number of tasks](https://arxiv.org/abs/2507.12466). This previous
-work is in decoder not encoders we might use in downstream applications.
+work is on decoders and not encoders like were used for mapping.
 The corpus could also be made more similar to fine-tuning data. In general shaping the replacements to be similar can be achieved through logit biasing.
 
 To measure the effect that the change in distribution has I would propose measuring the change in similarity to both the pre-training and post training distribution and how that correlates to 
@@ -152,9 +153,9 @@ measure of correlation between the document and the distributions and performanc
 ### Injecting Knowledge
 
 Beyond the distribution of words, sometimes knowledge will be missing. Acronyms or other words rarely or not seen during either pre-training or post-training can be expanded into more common forms.
-This effectively injects external knowledge that the base model may not reliably infer on its own.
-The reason this would be effective is that rare or domain specific words will likely have the most "information". This is the principle on which
-tf-idf works. If we are missing critical/rare words we can't effectively do the task as critical words are missed. For example,
+This effectively injects external knowledge that the base model may not reliably "infer" on its own.
+The reason this would be important is that rare or domain specific words will likely have the most "information". This is the principle on which
+tf-idf works (favoring rare words). If we are missing critical/rare words we can't effectively do the task as critical words are missed. For example,
 if a document is referring to a region, but an acronym is used the mapping will be missing (e.g, APAC vs Asia Pacific).
 While surveying the data I found a couple sources of rare words. These categories are not exhaustive, but they cover most observed cases.
 
@@ -208,7 +209,7 @@ The first is the correlation between changes in size and performance. Given that
 To measure correlation we'll again frame this problem as binary. Texts that are the same or smaller vs longer and see if there is a correlation.
 
 For the meaningfulness of the tokens, this is a bit trickier to measure and define. My only thought here is to measure how many sub-words are used
-(i.e., the fertility of the tokenizer). For now, I'd focus on the first.
+(i.e., the fertility of the tokenizer). For now, I'd focus on the first measure.
 
 
 ## Next Steps
