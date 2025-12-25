@@ -214,9 +214,19 @@ For the meaningfulness of the tokens, this is a bit trickier to measure and defi
 
 ## Next Steps
 
-The next steps are to measure the importance of different changes on output. 
-Moreover it may be important to replicate work over existing benchmarks and non-proprietary datasets
-and see if the results hold.
+This post presented a word replacement based pipeline to normalize text and improve generalization for mapping texts.
+Word replacement is simple, fast, and partially interpretable, and in preliminary experiments it led to small but consistent recall improvements on held-out domains, especially when combined with data expansion.
+The idea is that some of the performance drop in new settings for mapping comes from acronyms, rare terms, spelling errors, and client-specific phrasing shift the model hasn't seen.
+These gains are small and likely task specific, but they suggest normalization can be a useful tool in some settings.
+
+To better understand when and why this approach works, the next step is to measure the underlying mechanisms of action. Specifically I suspect they are: 
+changes in token distribution relative to pre-training or fine-tuning data, explicit injection of missing knowledge through acronym or rare word expansion, and changes in tokenization "efficiency".
+Each of these mechanisms can be measured, for example by correlating distributional similarity or global changes in text length with downstream performance, or by breaking improvements down by replacement type.
+Note that the data used here has a high density of rare acronyms and domain-specific language, so it is important to replicate this work on non-proprietary datasets and more standard benchmarks to see how general these results are.
+The broader goal is not to claim that word replacement is a good general technique, but to better [characterize](https://felixlabelle.com/2025/01/01/direction_for_the_year.html) the cases where normalization improves generalization and to make that decision more principled.
+
+
+
 
 <!--
 #### Types of Replacements
