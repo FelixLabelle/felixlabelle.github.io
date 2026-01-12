@@ -74,14 +74,10 @@
     function eraseCookie(name) {
         createCookie(name,"",-1);
     }
-
     if(readCookie('cookie-notice-dismissed')=='true') {
         console.log("cookie notice dismissed");
   window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
 
-  gtag('config', 'G-LDRGZJ9EN5');
     } else {
         document.getElementById('cookie-notice').style.display = 'block';
     }
