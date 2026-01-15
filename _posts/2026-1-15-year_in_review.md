@@ -5,12 +5,12 @@
 ## 2025 in Review
 
 My research questions/interests the last few years has circled around the inability to plan ML projects or for see the best way forward due to a fundamental lack of understanding.
-We are missing knowledge and tools to [characterize models and tasks](https://felixlabelle.com/2025/01/01/direction_for_the_year.html).
+We are missing knowledge and tools to [characterize models and tasks](https://felixlabelle.com/2025/01/01/direction_for_the_year.html);
 I set out a goal last year to focus my work on having a better understanding of the relationships between models and the downstream tasks we are trying to solve. Here's what I blogged in that vein:
 
 * **[“Practical Tidbits: Taking a Magnifying Glass to (Text) Classifier Performance”](https://felixlabelle.com/2025/06/15/evaluation_101.html)** was an attempt to capture my approach to debugging text classifiers.
 * **[“Temperature, Tokens, and Long Tales/Tails”](https://felixlabelle.com/2025/10/19/relationship_temp_token_gen.html)** focused on generation dynamics: how decoding choices effect output generation length, based on an observation. This was a fun little piece and will likely have a follow up this year.
-* **[“On the Theoretical Limitations of Embedding-Based Retrieval”](https://felixlabelle.com/2025/11/21/review_of_theoritical_limit_ir.html)**. It was an analysis and critique of a paper that claimed there were important limits to embeddings, a personal hobby horse of mine. 
+* **[“On the Theoretical Limitations of Embedding-Based Retrieval”](https://felixlabelle.com/2025/11/21/review_of_theoritical_limit_ir.html)**. It was an analysis and critique of a paper that claimed there were important limits to embeddings, IR being a hobby horse of mine. 
 
 My other posts were more method focused, in other words applications of NLP (primarily LLMs) rather than studying higher level settings.
 * **[“Using Landmarks to Extract Spans with Prompting”](https://felixlabelle.com/2025/08/28/span_extraction.html)** proposes a method which uses "anchor text" to enable span extraction without relying on a trained sequence labeling model. 
@@ -31,12 +31,12 @@ primarily privacy, cost control, and the desire to fully understand the systems 
 
 The resulting homelab that’s been built out primarily serves four needs:
 
-1. Storage
+1. Storage for data and models
 2. Training compute
 3. Inference compute
 4. Application hosting
 
-The design, implementation, and ongoing maintenance added significant overhead. Every decision, whether it be networking, GPUs, disk layout, OS, etc.. had a learning curve associated with it.
+The design, implementation, and ongoing maintenance added overhead. Every decision, whether it be networking, GPUs, disk layout, OS, etc.. had/has a learning curve associated with it.
 
 That said, having full-stack control over experiments has opened up doors. Questions that would have felt too expensive or annoying to explore on rented compute are now merely time-boxed. It also
 allows for the use of apps that constantly run (e.g., pipelines, agents, etc..). I’ll be writing a dedicated post on my homelab within a month or two, describing my needs, how I met them, and 
@@ -45,16 +45,14 @@ future improvements.
 ### Training "Foundation" Models
 
 A lot of claims about model performance, especially things like "domain-adaptation" or "emergent-behavior"
-rely on a combination of unknown training procedures, training data, and moving goal posts.
-I suspect that to work on characterization and domain questions custom trained models will be required.
- Specifically fine-grained control over the provenance of data is needed to make claims about things like
- domain adaptation.
-This sounds obvious, but it rules out most off-the-shelf options.
+rely on a combination of unknown training procedures, unknown training data, and moving goal posts.
+I suspect that to work on characterization, in particular domain questions custom trained models will be required.
+This need sounds obvious, but it rules out most off-the-shelf options.
 Most (recent) models where the training dataset is known are decoders, not necessarily encoders.
 To this end I've been:
-1. building a light, PyTorch based, "framework" for encoder-based models
+1. building a light, PyTorch based, "framework" for training encoder-based models
 2. building out an evaluation dataset 
-3. building a training machine
+3. building a computer to train models
 4. working on deployment pipelines to use these models in downstream applications/experiments
 
 
@@ -81,11 +79,11 @@ If 2025 was about building scaffolding, 2026 is about climbing it. That being sa
 
 ### Prerequisites
 
-Before any serious research push, a few foundational pieces need to be in place:
+Before any serious research push, three foundational pieces need to be in place:
 
-1. **Final infrastructure improvements**, particularly around speeding up model hosting and inference. The current setup works, but it leaves performance on the table and breaks from time to time
+1. **Final infrastructure improvements**, particularly stabilizing my model hosting and inference pipeline. The current setup works, but it leaves performance on the table and breaks from time to time
 2. **A research management tool** that supports question-driven exploration rather than paper-driven accumulation
-3. **Finish my light framework for training a foundation model**, even if small, with fully controlled data provenance to serve as a testbed for domain experiments
+3. **Finish my light framework for training a foundation model**, even if small, with fully controlled data provenance to serve as a test bed for domain experiments
 
 ### Research
 
