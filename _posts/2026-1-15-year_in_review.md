@@ -1,4 +1,4 @@
-# 2025 -> 2026
+# Bye 2025, Hi 2026
 
 2025 was a good year, but I didn’t accomplish as much as I initially expected. So is life. The reduced output is likely due to side quests that didn’t result in any artifacts (yet).
 
