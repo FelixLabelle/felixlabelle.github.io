@@ -101,7 +101,7 @@
 
     // Heartbeat every 10 seconds while page is visible
     var heartbeatInterval = setInterval(function() {
-      if (document.visibilityState === 'visible' && !sent) {
+      if (document.visibilityState === 'visible') {
         var engagedSeconds = Math.floor((Date.now() - startTime) / 1000);
         if (engagedSeconds - lastEngagedSeconds >= 10) {
           lastEngagedSeconds = engagedSeconds;
