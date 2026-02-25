@@ -18,27 +18,113 @@
   <script type="text/javascript" src="/js/highlightjs/languages/plaintext.min.js"></script>
   <script type="text/javascript" src="/js/highlightjs/languages/powershell.min.js"></script>
   <script type="text/javascript" src="/js/highlightjs/languages/tsql.min.js"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LDRGZJ9EN5"></script>
+
 <script>
-
-
   window.dataLayer = window.dataLayer || [];
-
-
   function gtag(){dataLayer.push(arguments);}
-
-
   gtag('js', new Date());
+  gtag('config', 'G-LDRGZJ9EN5', {'send_page_view': true});
 
+  // Scroll tracking
+  (function() {
+    var scrollThresholds = [25, 50, 75, 100];
+    var tracked = {};
 
+    function getScrollPercent() {
+      var scrollTop = window.scrollY || document.documentElement.scrollTop;
+      var docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+	  if (docHeight <= 0) return 100;
+      return Math.round((scrollTop / docHeight) * 100);
+    }
 
+    function trackScroll(threshold) {
+      var key = 'scroll_' + threshold;
+      if (!tracked[key]) {
+        tracked[key] = true;
+		gtag('event', 'scroll_depth', {
+		  percent_scrolled: threshold
+		});
+      }
+    }
 
+    window.addEventListener('scroll', function() {
+      var percent = getScrollPercent();
+      scrollThresholds.forEach(function(threshold) {
+        if (percent >= threshold) {
+          trackScroll(threshold);
+        }
+      });
+    });
+  })();
 
-  gtag('config', 'G-LDRGZJ9EN5');
+  // Link click tracking
+  (function() {
+	function isExternalLink(href) {
+	  try {
+		var linkUrl = new URL(href, window.location.origin);
+		return linkUrl.hostname !== window.location.hostname;
+	  } catch (e) {
+		return false;
+	  }
+	}
 
+    document.addEventListener('click', function(e) {
+      var link = e.target.closest('a');
+      if (!link) return;
 
-  </script>
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-LDRGZJ9EN5"></script>
+      var href = link.getAttribute('href');
+      if (!href) return;
 
+      if (isExternalLink(href)) {
+		gtag('event', 'outbound_click', {
+		  link_url: href
+		});
+      }
+    });
+  })();
+
+  // Time on page tracking (heartbeat + visibility)
+  (function() {
+    var startTime = Date.now();
+    var sent = false;
+    var lastEngagedSeconds = 0;
+
+    function sendTimeOnPage() {
+      if (sent) return;
+      sent = true;
+      var engagedSeconds = Math.floor((Date.now() - startTime) / 1000);
+		gtag('event', 'page_time', {
+		  engaged_seconds: engagedSeconds
+		});
+    }
+
+    // Heartbeat every 10 seconds while page is visible
+    var heartbeatInterval = setInterval(function() {
+      if (document.visibilityState === 'visible' && !sent) {
+        var engagedSeconds = Math.floor((Date.now() - startTime) / 1000);
+        if (engagedSeconds - lastEngagedSeconds >= 10) {
+          lastEngagedSeconds = engagedSeconds;
+          gtag('event', 'engaged_time', {
+            engaged_seconds: engagedSeconds
+          });
+        }
+      }
+    }, 10000);
+
+    document.addEventListener('visibilitychange', function() {
+      if (document.visibilityState === 'hidden') {
+        clearInterval(heartbeatInterval);
+        sendTimeOnPage();
+      }
+    });
+
+    window.addEventListener('pagehide', function() {
+      clearInterval(heartbeatInterval);
+      sendTimeOnPage();
+    });
+  })();
+	</script>
   <script type="text/javascript"> hljs.highlightAll(); </script>
   <!-- end highlight.js support -->
 </head>
