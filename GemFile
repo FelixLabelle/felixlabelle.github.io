@@ -1,0 +1,11 @@
+# Source - https://stackoverflow.com/a/75077137
+# Posted by Christian
+# Retrieved 2026-03-01, License - CC BY-SA 4.0
+
+source "https://rubygems.org"
+
+gem 'github-pages', group: :jekyll_plugins
+
+group :jekyll_plugins do
+  gem 'jekyll-commonmark-ghpages'
+end
