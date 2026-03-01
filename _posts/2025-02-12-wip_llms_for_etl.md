@@ -35,7 +35,7 @@ There is overlap between these three groups and errors downloading, so in the en
 in hind sight this was a mistake. HuggingFace doesn't enforce unique names for datasets, just user & dataset. I will add back
 user info in a future version.
 
-<details>
+<details markdown="1">
 <summary>Huggingface Datasets Used (Dataset Name Only)</summary>
 abstraction_and_reasoning_corpus
 abstract_narrative_understanding
@@ -286,7 +286,7 @@ in particular that the output can be partially validated through use of rules. T
 
 This means we can discard or even limit the outputs the model can generate. Only the former was performed. This was done using a Pydantic data model:
 
-<details>
+<details markdown="1">
 <summary>Pydantic Data Model for a Task</summary>
 class Task(BaseModel):
     allowed_values: Set[str]
@@ -322,7 +322,7 @@ class Task(BaseModel):
 The end result is list of tasks and standardized format. Each key represents the standardized output present.
 The values are the corresponding input dataset columns. Here is an example:
 
-<details>
+<details markdown="1">
 <summary> Resulting Output </summary>
 {% raw %}
 {"label": "label", "task_type": "Classification", "text_1": "sentence1", "text_2": "sentence2"}
@@ -335,7 +335,7 @@ The prompt was tuned over 4 smaller pilots (5,10,20,20) to find potential issues
 over the entire corpus. Some lessons learned here include limiting use of Markdown, however this may well 
 be model specific. In the end, the prompt used was:
 
-<details>
+<details markdown="1">
 <summary>V5 Prompt Used</summary>
 {% raw %}
 You are Qwen, created by Alibaba Cloud. You are a helpful assistant.
@@ -393,7 +393,7 @@ Dataset and Structure:
 This prompt above was used with [Qwen2.5-Coder-32B-Instruct-AWQ](https://huggingface.co/Qwen/Qwen2.5-Coder-32B-Instruct-AWQ). Reasoning for this choice is that it was the best model
 that I could run locally.
 Hyperparameters used are below. Multiple calls are made and outputs are added together.
-<details>
+<details markdown="1">
 <summary> Prompting Code and Hyperparameters </summary>
 
 def transform_call(key_value_mappings,prompt):
@@ -450,7 +450,7 @@ def transform_call(key_value_mappings,prompt):
 
 
 
-<details>
+<details markdown="1">
 <summary> Verification code </summary>
 
 </details>
@@ -476,7 +476,7 @@ Some of the time the prompt fails to find any tasks. Out of the 358 dataset & co
 The parse rate is 57.82%. To better understand these failures 30 dataset & config pairs were sampled and assigned high level categories
 
 <!--
-<details>
+<details markdown="1">
 <summary> Sample of Failed Tasks and Corresponding Labels </summary>
 {%raw%}
 task not clearly formatted: [all blimp tasks, https://huggingface.co/datasets/lmarena-ai/arena-human-preference-55k,HarmfulQA , https://huggingface.co/datasets/OpenSafetyLab/Salad-Data]

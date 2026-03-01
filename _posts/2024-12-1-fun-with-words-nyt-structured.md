@@ -86,7 +86,7 @@ are normalized (i.e., they now sum to 1).
 All the probabilities for the yes tokens are summed together and that is the probability of two words being similar. This is 
 what is used for search.
 
-<details>
+<details markdown="1">
 <summary> Click to show the masking code </summary>
 {% raw %}
 ```
@@ -142,7 +142,7 @@ the prompt may give wildly different results. Here is one example from the follo
 	"MIST", ICE: 0.1840386837720871
 ```
 
-<details>
+<details markdown="1">
 <summary> This particular example comes from the experiment with these settings </summary>
 ```
 	"metadata": {
@@ -201,7 +201,7 @@ random groupings are first generated then scored. Pairwise permutations are cond
 `random` picks `k` random inputs. Annealing strategies were not implemented nor tested. After computing the scores
 of these permutations the top `k` are kept. The algorithm continues until `patience` turns have passed without improvement.
 
-<details>
+<details markdown="1">
 <summary> Click to show the search code </summary>
 
 {% raw %}
@@ -319,7 +319,7 @@ Unlike the generative experiments these experiments leveraged 4,8 and 16-bit mod
 
 Two prompts were used, themed and default. They are:
 
-<details>
+<details markdown="1">
 <summary> Click to show the prompts used </summary>
 {% raw %}
 ```
@@ -352,7 +352,7 @@ K-shot examples (other word pairs) were also appended to the prompt to improve p
 K-shot examples are picked at random from the connections dataset (or sample) excluding the current item. These examples are appended
 to the prompt as dialogs in a chat.
 
-<details>
+<details markdown="1">
 <summary> Click to show the k-shot code </summary>
 {% raw %}
 ```
@@ -379,7 +379,7 @@ These metrics were ignored for now to be consistent with the previous post, but 
 Below are the results. Any missing results are due to the experiment erroring out. A small number failed due to OOMs. Best effort was made to 
 run every test point, but some slipped by.
 
-<details>
+<details markdown="1">
 <summary> Click to see raw results </summary>
 
 | model_id                              |   param_count |   prompt_k | prompt_version   |   resolution |   mean_accuracy |
@@ -587,7 +587,7 @@ with one taking 20 times longer.
 I think this is due to the larger models and longer queries being split between CPU and GPU which negated the advantage provided by larger batch sizes. The raw results for the comparisons are
 presented below. `time_ratio` is the percentage of time the structured approach took compared to the generative approach (structured/gen). `accuracy_delta` is given by `mean_accuracy_structured` - `mean_accuracy_generative`.
 
-<details>
+<details markdown="1">
 <summary> Click to see raw results </summary>
 
 | model_id                              |   k_shot |   total_run_time_seconds_generative |   total_run_time_seconds_structured |   mean_accuracy_generative |   mean_accuracy_structured |   accuracy_delta |   time_ratio |
