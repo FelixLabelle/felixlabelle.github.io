@@ -56,7 +56,7 @@ Used JSON as the output's structure as it is easy to work with and validate usin
 This may well effect impact performance in a way that makes comparing models difficult, 
 but there likely would be no "fair" format. Here is a function which generates regex describing an example valid output,
 
-<details>
+<details markdown="1">
 <summary> Click to see code </summary>
 {% raw %}
 ```
@@ -98,7 +98,7 @@ Used greedy decoding. Adding in different decoding approaches and additional hyp
 I used a very simple prompt and didn't tweak it. While models are brittle, messing around with prompts to improve performance is trivial IMO and falls outstide of the scope of these experiments.
 The prompt used was:
 
-<details>
+<details markdown="1">
 <summary> Click to see code </summary>
 {% raw %}
 ```
@@ -154,7 +154,7 @@ Different k-shot values were used.
 
 K-shot examples are picked at random from the connections dataset (or sample) excluding the current item and added afterwards.
 
-<details>
+<details markdown="1">
 <summary> Click to see code </summary>
 {% raw %}
 ```
@@ -178,7 +178,7 @@ Tried both guided and unguided generation.
 
 This is implemented using Pydantic classes.
 
-<details>
+<details markdown="1">
 <summary> Click to see code </summary>
 {% raw %}
 ```
@@ -215,7 +215,7 @@ For now two metrics were implemented
 
 ### Raw Results
 
-<details>
+<details markdown="1">
 <summary> Click to see raw results </summary>
 
 | model_id                              | `use_structured_prediction`   |   `k_shot` |   mean_accuracy |   percentage_format_passed |

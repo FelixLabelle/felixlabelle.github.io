@@ -76,7 +76,7 @@ The code below tries different n_gram counts, hash functions, number of permutat
 more likely than not you will want to pick a threshold and n_gram_size first. Each experiments metrics and measures are stored and saved at the end.
 
 
-<details>
+<details markdown="1">
 <summary> Click to show code </summary>
 
 {% raw %}
