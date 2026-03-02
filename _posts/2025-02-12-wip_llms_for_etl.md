@@ -566,7 +566,8 @@ Beyond the time required, cost is another consideration. Here are rough estimate
 The prompt above took about 500 watt per hour and each run took 1h30 min. For me that translates to 14 cents per run.
 In total I did 8 runs, at a cost of $1.02 . That however doesn't account for the time to create the tool, verify the output.
 Assuming a developer costs [$60 an hour](https://www.indeed.com/career/python-developer/salaries) and an annotator to verify
-costs $12 the total cost would be $193.02
+costs $12.00 the total cost would be 
+$193.02
 
 
 If you can pay an annotator and reviewer $12, assuming equal time required for both the cost would be ~$128. Not only is this 

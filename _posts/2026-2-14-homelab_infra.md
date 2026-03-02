@@ -110,18 +110,16 @@ bandwidth for compute and memory. When I did my research (~1 year ago) there wer
 Below is a table comparing (at a high-level) these 3 options. Because of how many variants there are for each options and the variability 
 in computer parts pricing these days, take this table with a grain of salt.
 
-<!-- TODO: Verify the validity of each item -->
-<!-- TODO: Add idle power -->
-| Dimension               | GPU                                    | CPU + Multichannel DDR5 Memory (server grade)                     | APU                                     |
-|-------------------------|----------------------------------------|---------------------------------------|-----------------------------------------|
-| **Cost**                | High ($500–$15,000+ per device)        | High ($3,000-$6,000)                  | Moderate ($800–$5000)                         |
-| **Peak Energy Consumption**  | High (250W–500W+ per device)           | Moderate (150W–400W)                  | Moderate (150W–200W)                          |
-| **Idle Energy Consumption**  | High (30-100W + 25-50W per device)           | Low (30-100W)                  | Low (30-50W)                          |
-| **Software Support**    | *Good (*NVIDIA: CUDA, cuDNN, TensorRT)      | Good     | Fair (Limited to vendor frameworks)     |
-| **Generation Speed**    | Very Fast (High parallel throughput)   | Slow-Moderate (particularly for large models)| Moderate (Larger models suffer)      |
-| **Availability**        | Low-Moderate (Model dependent, supply constrained)          | Moderate (Steady supply, not consumer grade)                 | Moderate (Widely stocked)                  |
-| **Memory (GB)**         | 8–80 GB (VRAM)                         | 128–512 GB (RAM)                   | 32-128 GB (Shared RAM/VRAM)              |
-| **Memory Bandwidth**    | Very High (300–1,000 GB/s)             | Moderate (150-400 GB/s, *DDR5, multichannel)              | Moderate (200-400 GB/s)              |
+| Dimension               | GPU                                    | CPU + Multichannel DDR5 Memory (server grade) | APU                                     |
+|-------------------------|----------------------------------------|-----------------------------------------------|-----------------------------------------|
+| **Cost**                | High (\$500–\$15,000+ per device)      | High (\$3,000–\$6,000)                        | Moderate (\$800–\$5,000)                |
+| **Peak Energy Consumption**  | High (250W–500W+ per device)           | Moderate (150W–400W)                          | Moderate (150W–200W)                    |
+| **Idle Energy Consumption**  | High (30-100W + 25-50W per device)     | Low (30-100W)                                 | Low (30-50W)                            |
+| **Software Support**    | *Good* (NVIDIA: CUDA, cuDNN, TensorRT) | Good                                          | Fair (Limited to vendor frameworks)     |
+| **Generation Speed**    | Very Fast (High parallel throughput)   | Slow-Moderate (particularly for large models) | Moderate (Larger models suffer)         |
+| **Availability**        | Low-Moderate (Model dependent, supply constrained) | Moderate (Steady supply, not consumer grade) | Moderate (Widely stocked)               |
+| **Memory (GB)**         | 8–80 GB (VRAM)                         | 128–512 GB (RAM)                              | 32-128 GB (Shared RAM/VRAM)             |
+| **Memory Bandwidth**    | Very High (300–1,000 GB/s)             | Moderate (150–400 GB/s, DDR5, multichannel)   | Moderate (200–400 GB/s)                 |
 
 Frankly, APUs are a compromise, but they are what made the most sense to me.
 Low energy consumption especially at idle, potable speeds, relatively good availability,
