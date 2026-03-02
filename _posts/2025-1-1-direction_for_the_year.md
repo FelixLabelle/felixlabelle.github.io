@@ -76,7 +76,7 @@ This vein of work was chosen with several assumptions in mind. These are axiomat
    - It is often sufficient for the task at hand. At we work we often need to determine if documents are well written, which can be broken down into facets. We can use classifiers to either extract facets from text or even just train a classifier to detect whether they are present.
    - It is versatile and can serve as filters, information enhancers, or a tool for finding similar or "confusing" items.
 5. **There exists measures that can be used to capture downstream performance across a variety of settings.** That's not to say they will be easy to find, just that I think they do exist.
-6. **Being a non (m|b|tr)illion-dollar entity focusing on simpler tasks and characterization is a good way to compete/create useful models.**
+6. **Not being a m/b/tr illion-dollar entity focusing on simpler tasks and characterization is a good way to compete/create useful models.**
 
 ### Relevant Work
 
