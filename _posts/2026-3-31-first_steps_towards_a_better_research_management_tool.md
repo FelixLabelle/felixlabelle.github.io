@@ -126,28 +126,10 @@ data they are run over.
 | Clustering     | Vector       | KMeans (embeddings)      | abstract, body            | Dense                      | None (batch)             | N/A                    | No (implicit)     | Implicit (distance to centroid)        | Optional               | Offline grouping |
 | Clustering     | Graph        | Community detection      | citation graph            | Graph-based                | Graph index              | N/A                    | No (implicit)     | Implicit (modularity optimization)     | Optional               | Structure-driven clusters |
 
-There are a handful of indices I used:
-* Keyword
-    * BM25
-    * Postgres search
-* Vectorial
-    * Sparse
-        * splade
-        * splade
-        * splade
-    * Dense
-        * nomic--
-* Citation (for recomendations more so than just search)
-    * BCM
-    * CC
-    * Fused normalized
-* Exact search
 
 The number of combinations becomes a bit absurd when you start actually
 thinking about it. That's before we even start talking about combining methods through fusion
-or reranking.
-
-no agents yet. just wanted to try a better search
+or reranking. no agents yet. just wanted to try a better search
 
 ### UI/UX
 
@@ -161,7 +143,7 @@ Ability to create recommendations
 
 Recommendation engines:
 1. vector based
-2. bibliobased
+2. bibliometric
 
 #### Research Question Management
 
