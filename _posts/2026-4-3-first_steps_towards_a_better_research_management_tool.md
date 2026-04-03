@@ -1,15 +1,17 @@
 # WIP: Towards  Better Reserach Management Tools
 
 As part of my day job or personal research I need to find answers to 
-scientific/engineering questions such as "what methods exist to extract information from structure",
-"the effects of parametric knowledge on factuality", "what's a good definition for domain and 
-how does that correlate to performance", and so on so forth.
+scientific/engineering questions such as:
+* "what methods exist to extract information from structure",
+* "what are the effects of parametric knowledge on the factuality of summaries"
+* "what's a good definition for domain and how does that correlate to performance"
+
 Finding research papers to answer a given research question can be a pain in my experience.
 This is partly due to the headaches of needing many tools to find all relevant results and the pain of collating/organizing those results.
 
 IMO there are four steps to finding papers:
-1. **Problem Definition**: Defining the scope (e.g., research question, survey)
-2. **Selection**: Finding relevant papers within that scope
+1. **Problem Definition**: Defining the scope (i.e., what papers/fields/subjects/topics are relevant to my research question, survey)
+2. **Selection**: Finding (all) relevant papers within that scope
 3. **Curation**: Triaging, collating, and organizing relevant papers
 4. **Interpretation**:Interpreting results; either finding a conclusion, refining scope (i.e., rinse, wash, and repeat), or identifying further research needed.
 
@@ -17,16 +19,16 @@ While each step poses challenges, 2 and 3 are unnecessarily hard given the curre
 
 ## The Status Quo
 
-Currently searching for papers is frustrating; I need to use different tools and organize the results manually. I've tried different combinations of search methods, namely
-1. Google
-2. arXiv
-3. Semantic Scholar (closest to how I like to organize results)
-4. Alphaxiv (as an aside I like their UX, especially how they integrate multiple search methods)
-5. Connected papers
+Currently searching for papers is frustrating because I need to use different tools (i.e., **selection**) and organize the results manually (i.e., **curation**). I've tried different combinations of search methods, namely
+1. [Google](https://www.google.com/) (search and it's other products)
+2. [arXiv](https://arxiv.org/)
+3. [Semantic Scholar](https://www.semanticscholar.org/product/api) (closest to how I like to organize results)
+4. [alphaXiv](https://www.alphaxiv.org/) (as an aside I like their UX, especially how they integrate multiple search methods)
+5. [Connected papers](https://www.connectedpapers.com)
 6. Deep research tools (e.g., deep research) 
 
 [Aaron Tay gives some insight
-into the opaqueness of current search approaches that IMO is partly what makes finding relevant papers harder](https://aarontay.substack.com/p/the-blank-box-problem-why-its-harder).
+into how the opaqueness of current search approaches is partly what makes finding relevant papers harder](https://aarontay.substack.com/p/the-blank-box-problem-why-its-harder).
 In short, under the hood each of these tools uses different technologies such as keyword search (e.g., boolean search, bm25), neural embeddings, citation based methods, and now agents.
 Each method expects different input formats and is lacking in slightly different ways.
 In my experience that translates into needing a large number of queries and tools is needed to perform an exhaustive search.
@@ -38,8 +40,9 @@ Here's kind of a short list of the failure modes of these different approaches i
 2. Neural methods can be used to perform QA, IR, amongst other tasks. In general they have a fair amount of flexibility when it comes 
 to finding results, i.e., not just keyword based. That said they are often trained to perform a specific task 
 on specific data and are likely to fail in unexpected ways outside of their domain. My favorite failure mode so far has been ranking punctuation heavy spans very highly.
-3. Bibliographic methods are cool and leverage scientific communities. That said they tend to not be interdisciplinary and can wind up only finding certain pools of authors
-that co-cite each others work. If there are cliques, veins of research, or different communities you may not find them unlike textual methods
+3. Bibliographic methods are cool and leverage the work done by scientific communities through citation tracking. That said they tend to not be interdisciplinary and can wind up only finding certain pools of authors
+that co-cite each others work. If there are cliques, veins of research, or different communities you may not find them unlike textual methods. Moreover once in a 
+while papers irrelevant to your query can be surfaced if they are just oft-cited.
 4. Deep research/agentic approaches are relatively new. In general I've been disappointed by these tools,
 they tend to pull in only tangentially relevant results and miss some clear matches. I'm not quite sure 
 how they work or if they perform the work consistently because 
@@ -56,6 +59,8 @@ Some examples include
 3. Zotero 
 4. Semantic Scholar (I like the idea of this tool more than the tool itself)
 
+I've tried different systems above and the only one I've consistently used is Excel. I hate it,
+copying in results and correcting the occasional gaff gets tedious.
 
 ## Custom Solution
 
@@ -73,10 +78,10 @@ To be clear, I don't think this search experience is for everyone. There are a l
 they will probably make the process more confusing (even for me having more than 2-3 choices is a lot).
 
 This translates into building a "search engine for papers" (the nth one) and the components required 
-to maintain a search engine. At a high-level, there are four parts to making a search tool:
+to maintain a search engine. At a high-level, there are three parts to making a search tool:
 1. Corpus ingestion & curation
-3. Indexing
-4. User experience
+2. Indexing
+3. User experience
 
 ### Corpus Ingestion & Curation
 
@@ -133,12 +138,12 @@ python create_citation_graph.py -t SEARCH_CORPUS_TABLE_DATA --force
 python analyze_pipeline.py
 ```
 </details>
-
+<br>
 
 
 To make sure the dataset stays up to date the code is designed to store state in the database and only process items 
 that have failed or new items. This means that after the first run, the number of documents processed each run is minimal (only new documents and previously failed documents). I use 
-cron to run the update job weekly (as this is the frequency with which the arXiv dataset gets updated).
+[cron](https://en.wikipedia.org/wiki/Cron) to run the update job weekly (as this is the frequency with which the arXiv dataset gets updated).
 
 <details markdown="1">
 <summary>Cron Job for Running Update Pipeline</summary>
@@ -149,13 +154,13 @@ cron to run the update job weekly (as this is the frequency with which the arXiv
 
 ### Crawling
 <!-- NOTE: Start reviewing from here -->
-For a search engine to work, yoiu need papers to search and to keep that corpus up to date. That's what crawling does.
+For a search engine to work, you need papers to search and to keep that corpus up to date. That's what crawling does.
 You scour the web for content and download it. I decided to keep it simple and use papers off of arXiv only.
 
 Yes, I'm aware I could use Semantic scholar. My reasoning behind that choice is:
 1. I've been had by abandoned AI2 tools before (RIP [AllenNLP](https://github.com/allenai/allennlp)).
 2. this provides the flexibility to build out my own pipeline in the future
-3. while publishing pre-prints isn't required, but a common practice so coverage of papers is pretty good IMO. Some well known 
+3. while publishing pre-prints isn't required, it is a common practice so coverage of papers is pretty good IMO. Some well known 
 papers were just released as preprints
 4. it's simple to crawl arXiv and within ToS ([if done correctly](https://info.arxiv.org/help/bulk_data.html))
 
@@ -190,7 +195,7 @@ The highlights are
 2. A search corpus
 3. Span tables that correspond to different span sizes and types
 4. Metadata tables that track query usage
-5. A graph citation table 
+5. A graph citation table that is used to store bibliometric data 
 
 <details markdown="1">
 <summary>UML Relational Diagram</summary>
@@ -325,7 +330,7 @@ erDiagram
 
 ### Filtering
 
-Once the raw data has been stored, we still need to choose relevant results to download the corresponding PDFs
+Once the raw data has been stored, we still need to choose "relevant" papers to download the corresponding PDFs
 and further processing. Some optimistic (i.e., naive) napkin math based on a sample led me to believe I could store all of arXiv.
 After downloading a hundred thousand PDFs, I realized that was not the case.
 A heuristic for choosing with arXiv PDFs to download was in turn used: 
@@ -357,7 +362,7 @@ def score_relevance_v1(items):
 </details>
 
 <br>
-After filtering the corpus has ~100K documents. There are still irrelevant documents IMO and some results are missed,
+After filtering the corpus for NLP related tags there are ~100K documents. There are still irrelevant documents IMO and some results are missed,
 but for now the size required (~350GB for the PDFs and ~150GB for the DB) is potable.
 
 ### Downloading and Preprocessing
@@ -523,7 +528,7 @@ How to interface with each method should be built into the UI. I think there are
 
 
 ### More Search Tools
-<!-- Start reviewing here -->
+
 The approaches used to find relevant papers so far are limited in number and scope. Here are additional approaches I'd like to implement 
 1. Cross encoder (as a reranker)
 2. Listwise prompt based reranker
@@ -542,9 +547,9 @@ the number of pipelines increases exponentially and we need to handle this in a 
 
 ### DSL for Search
 
-One of the things that's hard about search is that it isn't one single task,
+One of the things that's hard about search is that it isn't a single task,
 it's a large myriad of tasks masquerading as one [like similarity](https://felixlabelle.com/2023/11/18/discussion-about-text-similarity.html). A given query from different users
-could have different valid results, different inputs could map to different
+could have different valid results, different inputs could map to different results.
 User intent is hard to decipher from just a query. Not all searches 
 are as simple as just finding results, [like tip of the tongue search](https://arXiv.org/abs/2502.17776), exploration,
 recommendation, and question answering for example.
