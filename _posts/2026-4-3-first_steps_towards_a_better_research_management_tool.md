@@ -1,7 +1,5 @@
 # WIP: Towards  Better Reserach Management Tools
 
-<!-- NOTE: Lets go through and work on the language, links,
-making sure words are consistent -->
 As part of my day job or personal research I need to find answers to 
 scientific/engineering questions such as "what methods exist to extract information from structure",
 "the effects of parametric knowledge on factuality", "what's a good definition for domain and 
