@@ -1,2 +1,8 @@
 ﻿_site
 results
+GemFile
+GemFile.lock
+Gemfile
+Gemfile.lock
+.bundle
+vendor/bundle
