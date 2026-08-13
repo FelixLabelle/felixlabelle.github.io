@@ -18,7 +18,7 @@ The 2026 track evaluates systems through two related tasks:
 * the retrieval task asks participants to find and rank the most relevant segments for a given topic
 * the full RAG task extends this by asking systems to generate an answer grounded in—and citing—the retrieved evidence
 
-Participants can access the corpus through a hosted [PySerini API](https://github.com/castorini/pyserini) (BM25 index) or build their own retrieval system.
+Participants can access the corpus through a hosted [Pyserini API](https://github.com/castorini/pyserini) (BM25 index) or build their own retrieval system.
 Before trying unique solutions for the retrieval portion of the task, we first need to establish a strong baseline.
 I chose to use dense embeddings as that strong baseline primarily because they are well supported in terms of tooling and are a known quantity to me.
 I've embedded datasets before, just nothing on this scale; making it work across 553 million documents poses additional challenges:
@@ -62,14 +62,14 @@ flowchart TD
         direction TB
         SEARCH["POST /{run_id}/search<br/>Rank top-k matches for one embedding run"]
         FAISS_GET["GET /corpus/{run_id}/{faiss_id}<br/>Fetch a stored passage by FAISS id"]
-        SHARD_GET["GET /corpus/{shard_id}<br/>Fetch the original Climbmix document"]
+        SHARD_GET["GET /corpus/{shard_id}<br/>Fetch the original ClimbMix document"]
     end
 
     subgraph RESPONSES[JSON responses]
         direction LR
         RESULTS["SearchResult[]<br/>faiss_uid, shard_id, score, text"]
         OBJECT["RunTable row<br/>faiss_uid, shard_id, text"]
-        DOCUMENT["ClimbmixCorpus row<br/>shard_id, text, source_file, source_row"]
+        DOCUMENT["ClimbMixCorpus row<br/>shard_id, text, source_file, source_row"]
     end
 
     QUERY -->|POST body| SEARCH
@@ -94,8 +94,7 @@ to implement RRF/other methods.
 
 ### How the API (and other tooling) is Hosted
 
-Beyond hosting the API there are other needs. Concretely we need to embed queries at run time,
-bulk embed queries when creating the index, store the dense embedding index, and  store the metadata 
+Beyond hosting the API, there are other needs. Concretely, we need to embed queries at runtime, bulk embed queries when creating the index, store the dense embedding index, and store the metadata 
 associated with the index.
 
 Each of these needs requires different compute and code. The diagram below details the tools, hardware, and software required to index and serve the pipeline.
@@ -156,7 +155,7 @@ flowchart LR
 As a TL;DR, there are three machines:
 1. A CPU-only machine that embeds queries at run time
 2. An index host that has the dense index, PostgreSQL and hosts the API. PostgreSQL was chosen because a DB makes persistence easier, a relational database makes aligning runs easier, and I'm familiar with the tool.
-3. A K8 cluster of 16 L4s that runs when indexing the dataset
+3. A Kubernetes cluster of 16 L4s that runs when indexing the dataset
 
 ### Creating the Index
 We first need to index the data. To this end we ingest ClimbMix into SQL, assign stable shard IDs, chunk each document for a given embedding run, 
@@ -213,13 +212,11 @@ The metadata (text and a UID) for each passage is stored in a
 table that has the run name in it. The reason each run is separated is to have 
 smaller indices (rather than having a single mega table).
 
-To do this with enough speed a multi-producer, multi-consumer architecture was used.
- Documents are fed into a queue by each producer,
+To do this with enough speed, a multi-producer, multi-consumer architecture was used. Documents are fed into a queue by each producer,
 which is consumed BATCH_SIZE items at a time. Each batch is embedded. The resulting output is fed into another queue
 consumed by the indexer. The indexer creates shards and writes the sharded metadata (with corresponding FAISS index IDs)
 to the SQL database. Without threading, we can't leverage the Kubernetes cluster fully.
-The indices themselves are using inner product, built with normalized vectors, using IVFPQ, and 
-use explicit IDs to map entries back to the PostgreSQL database.
+The indices themselves are computer using inner product, built with normalized vectors, using IVFPQ, and use explicit IDs to map entries back to the PostgreSQL database.
 
 After the shards are written, they need to be merged.
 
@@ -487,12 +484,12 @@ can accurately represent (there is an information-theoretical limit for lossless
 we chunk data. 
 
 I assume we're all aware of chunking. It could be as simple as using whitespace, regexes, etc.
-With a dataset of this size the most important part is going significantly faster than the embedding speed so it doesn't become a choke point.
+With a dataset of this size the most important part is going significantly faster than the embedding speed so it doesn't become a bottleneck.
 Chunkers are not complicated to implement, but to save time and provide different options I wound up using [Chonkie](https://docs.chonkie.ai/common/welcome).
 
 
 I first tried the [Token Chunker](https://docs.chonkie.ai/oss/chunkers/token-chunker#token-chunker),
-but it was too slow. I suspect this was [due to the use of HF tokenizers, which are comparatively slow to other options](https://krabarena.com/claims/gigatoken-ran-26-2x-faster-than-tiktoken-on-a-174-mb-gpt-2-owt-tokenizer-slice?utm_source=chatgpt.com).
+but it was too slow. I suspect this was [due to the use of HF tokenizers, which are slow compared to other options](https://krabarena.com/claims/gigatoken-ran-26-2x-faster-than-tiktoken-on-a-174-mb-gpt-2-owt-tokenizer-slice?utm_source=chatgpt.com).
 Speeds were reduced by about 10x compared to just yeeting whole documents and the CPU/RAM usage was quite a bit higher (based on a few glances at htop, we only employ peak engineering/science here)
 The [semantic chunker](https://docs.chonkie.ai/common/open-source#semanticchunker) was a little slower than the Token Chunker,
 but not as much as I'd expect given that it runs a model.
@@ -726,7 +723,7 @@ I opted not to since the baseline was a means to an end, not a goal (aka bigger 
 
 Beyond the nominal size, there is a question of which delimiter to use. Chonkie's 
 docs recommend different patterns, but I found that using whitespace worked best
-for two reasons 
+for two reasons:
 1. Sizes are more consistent, which helps keep index size consistent by not having very tiny chunks
 2. Size being more consistent also reduces the number of small chunks with no content. I did a smaller run with the "sentence" delimiter 
 and found that these tiny chunks would often be my top results. If there was a question similar to the query it would 
@@ -735,11 +732,25 @@ wind up being matched to the query.
 The notable downside is the risk of splitting up sentences, but the effect of this on performance is unclear.
 It would require more study, again beyond the scope of this post.
 
+#### Addendum
 
+After running the vector index for the last time 
+before the TREC RAG submission deadline, I noticed that the chunker still created tiny chunks.
+Often the chunks were questions, which wound up flooding the top 
+results for any given query. This made the results unusable and we 
+were unable to use the index for the competition.
+
+A day late and a dollar short, I finally gave in and decided to abandon Chonkie.
+I implemented a chunker that has a minimum "token" (again approximate) length as 
+well as the maximum.
+Even early versions of the minimum size chunker removed all questions from the results.
+The chunks and retrieval answers are now much better. I made changes to better preserve structure, run faster, and produce cleaner chunks.
+More on this in a future post. I'm currently in the process of testing the chunker and will release 
+the code as well as a benchmark to evaluate quality once it is complete.
 
 ### Embedding at Scale
 
-The biggest choke point in terms of speed is embedding chunks.
+One choke point in terms of processing speed is embedding chunks.
 We have 553 million documents. When I originally measured, I was getting 
 about 100 embeddings per second using an A100 with 40 GB of RAM using 
 [BGE 1.5 large](https://huggingface.co/BAAI/bge-large-en-v1.5). 
@@ -747,14 +758,14 @@ This model was chosen because of its relative size and relatively good
 performance.
  Assuming only 1 passage per document (which is incredibly naive)
 this works out to about 2 months of time required to embed the entire corpus.
-Realistically we will have between 600-1.2 Billion chunks to embed depending on 
+Realistically we will have between 600 million and 1.2 Billion chunks to embed depending on 
 chunk sizes so the time may be as much as 4 months at that rate.
 More chunks means slower so that's where the trade-off for unembedded data comes into play.
 
 I calculated that at least 1-2k embeddings per second are needed to finish in a matter of days or weeks.
 To do it with sufficient speed we only have a couple of options:
 1. Smaller models 
-2. Scaling embedding
+2. Scaling embedding throughput
 
 I chose to scale compute. While smaller models are an option,
 the speed required would limit us to [FastText](https://fasttext.cc/) or [Potion models](https://huggingface.co/collections/minishlab/potion).
@@ -767,22 +778,48 @@ I scaled up in 2 ways:
 2. Using a thread pool with a producer-consumer model (described above) to make concurrent calls
 
 One thing I would change about the design is how data is loaded. I read in data from SQL using bulk reads.
-I then would iterate over the items one at a time and chunk them from there. While this worked fine,
+I would then iterate over the items one at a time and chunk them from there. While this worked fine,
 I can't help but believe there is a better way. I think reading in documents this way 
 created a choke point and jitter with reading speeds. I would notice the pipeline choke up from time to time.
 
+### Intra-endpoint and Inter-endpoint Embedding Consistency
+
+Given the number of machines running embeddings and two different endpoints 
+(in my case GPU for bulk and CPU for single); it is important to be sure
+that the embeddings generated are consistent. There are two types of consistency we care about
+1. Intra-endpoint consistency; the same text to the same endpoint should return the same embedding 
+2. Inter-endpoint consistency; the same text to different endpoints should return the same embedding
+
+"Same" in this context is defined by cosine distance, which is what the index uses as a distance (well basically).
+Part way during the second to last full scale run I realized I had issues with the embedding service.
+Results were wonky past 100 million documents, while most results were relevant there were occasionally wildcards
+(my favorite being a document about Deadpool when asking about yogurt).
+
+After some digging, embeddings seemed to vary from batch to batch by a margin of 0.02-0.06 (this is rather large). Moreover, the same text embedded by CPU 
+could vary from 0.06-0.2 (this is massive).
+Ideally we'd have a similarity of 0.99 or higher
+Here are the steps taken to remedy the inconsistencies:
+1. Inter-service; ensure the same version of vllm, models, and containers were used. This greatly reduced the issue, but wasn't a complete solve
+2. Inter-service; ensure dtype, pooling, normalization, torch compilation and truncation behavior was the same across all three. This again made a slight difference
+3. Intra-service (GPUs): I disabled overlapping scheduling, disabled radix caching, disable chunkfill, and set a fixed memory fraction
+4. Both: Created an automated test to make sure that a sample of 1000 tests had no more than 0.001 cosine distance
+	1. Intra-service: Different batch combinations
+	2. Intra-service: Different GPUs
+	3. Inter-service: GPU vs CPU endpoints
+
+I would recommend checking this first before scaling your GPU runs. It seems obvious in hindsight, but hey.
 
 ### Index Size and Type 
 
-Ok, so now we can embed things with enough speed! Cool cool cool. Next step is to index those embeddings.
+Ok, so now we can embed things well enough and fast enough! Cool cool cool. Next step is to index those embeddings.
 
 The index design choices ended up mattering more than I expected.
 FAISS indices are built in a modular fashion and frankly can be a bit confusing at first.
 FAISS stores vectors and searches for nearby vectors under a chosen distance function, such as inner product or L2 distance.
 The distance itself is represented as an index. That said there is a recursive nature to FAISS indices.
 In other words an index can be made up of other indices which each add properties. Whether it be the distance used, quantization, use of IDs, use 
-of disk instead of RAM, etc.. 
-The easiest type of index to use in FAISS is a FLAT, in memory index. While an in-memory FAISS index is convenient, it is not realistic once the run is measured in billions of vectors and multiple terabytes.
+of disk instead of RAM, etc. 
+The easiest type of index to use in FAISS is a flat, in-memory index. While an in-memory FAISS index is convenient, it is not realistic once the run is measured in billions of vectors and multiple terabytes.
  That pushed me from the onset towards a disk-backed IVF-style setup.
 IVF is a cluster-driven index, grouping vectors into clusters.
 
@@ -828,14 +865,13 @@ like cosine similarity), `IndexIVFPQ` adds inverted lists and product quantizati
  This means embedding a subset of the corpus, training the index on that sample, and only then streaming the full corpus through the trained index.
 Training an index requires a sample large enough to represent the corpus, based on the number of clusters.
 
-Since the index is running off disk, the number of clusters matters. Too many clusters requires
-a large training set, which needs to all be stored in RAM. A 128k index requires at least 5M examples, which means ~40 GB of RAM
+Since the index is running off disk, the number of clusters matters. Too many clusters require a large training set, which all needs to be stored in RAM. A 128k index requires at least 5M examples, which means ~40 GB of RAM
 is used. This estimate is based on the runs I saw and again monitoring them through htop. A smaller index will result in slow run times.
 
 Word to the wise, you need to estimate cluster size before committing to an index layout. 
 The rough calculation is `num_vectors / num_clusters`, and at this corpus size 1024 clusters leaves each cluster far too large (nearly a million).
 Moving to 64k or 128k clusters gave FAISS much smaller candidate buckets and made disk-backed retrieval acceptable for serving.
-Coordinate the number of clusters based on the number of chunks you expect to have. The utility code should help you estimate the index size.  I now would estimate the target number of vectors, choose the IVF cluster count, sample enough embeddings to train that layout, and validate query latency before committing to the full run. 
+Coordinate the number of clusters based on the number of chunks you expect to have. The utility code should help you estimate the index size. I would now estimate the target number of vectors, choose the IVF cluster count, sample enough embeddings to train that layout, and validate query latency before committing to the full run. 
  If the number of clusters is too small, each cluster becomes huge and retrieval slows down. 
  If the training sample is too small or unrepresentative, the clusters are worse and search quality or speed can suffer. Some clusters wind up 
  rather large and increase the variability in retrieval speeds. Lol there's no winning, it's engineering.
@@ -843,7 +879,7 @@ Coordinate the number of clusters based on the number of chunks you expect to ha
 Another note is that the number of shards writing during embedding is also important. Originally I had small shards (~40 MB), meaning I wound up with 10s of thousands 
 of shards. This caused the merge script to take an eternity if it completed at all. Make sure to keep the number of shards under 10k,
 ideally 1-4k. The trade-off here is the larger the shards, the more RAM your machine needs at run time. If you are using a larger RAM machine, that may 
-be worth the trade off.
+be worth the trade-off.
 
 ### Machine Types
 
@@ -852,22 +888,56 @@ Different tasks require different machines:
 
 1. Bulk embedding -> cheap GPUs. I picked L4s because our availability was high enough and based on some quick testing the cost/throughput ratio was the best
 2. One-off embeddings (i.e., inference time compute) -> AVX-512 machine (Intel Sapphire Rapids or higher). C3 8 core standard came clutch in here. If you have more models you may want more cores 
-to distribute models more evenly across cores and to keep good speeds. You could use Kubernetes too to leverage the scaling. If you use very large decoder models for embeddings you may want to look 
-at still using GPUs
+to distribute models more evenly across cores and to keep good speeds. You could use Kubernetes too to leverage the scaling. If you use very large decoder models for embeddings you may still want to look at using GPUs
 3. Indexing.
-	1. Training an IVF index for clustering is more involved and requires (AFAIK) having a lot of memory. I would recommend high-memory machines (64 GB+, ideally 256).
+	1. Training an IVF index for clustering is more involved and requires (AFAIK) having a lot of memory. I would recommend high-memory machines (64 GB+, ideally 256 GB).
 	This step is not as time consuming so you could swap out the machine for a smaller one when embedding.
 	2. For the steady state a smaller machine can be used (8 cores, 16 GB RAM is fine). I recommend training and then swapping just because of the cost difference and duration
 	of the indexing. If you are "[big ballin'](https://www.youtube.com/watch?v=xBq-H6pOHAE)" disregard this and just use the same machine as training the index.
-4. Serving. I did it on the same machine as indexing, but really out of simplicity. You could likely get away with a smaller machine.
+4. Serving. I did it on the same machine as indexing, but really for simplicity. You could likely get away with a smaller machine.
 
+### Concurrent Code
 
+While the multi-producer, multi-consumer approach worked, it was not flawless.
+For the last run, I tried scaling up the number of GPUs to 128 to get all of ClimbMix indexed within a day.
+However I quickly noticed that after doubling the GPUs (32 in total) the gains stopped. It's not clear 
+to me what the issue is. Here are my observations (i.e., "symptoms"):
+1. Jitter. Sometimes everything comes to a crawl and then ramps back up to full speed. This gets worse as the number of threads increases
+2. Indexing puts CPU usage through the roof. Like 90% usage across all "cores" in htop.
+3. Increasing the number of consumers didn't increase speed; it stayed roughly the same or got worse
+
+While I didn't really explore settings, I think there is fundamentally an issue with either 
+the implementation or design of the approach. I don't know if the solution is to distribute
+indexing across multiple machines, use a different pattern for concurrency, or it's just 
+a silly oversight. I'll look into this further, but I'm not sure there will be updates on this front.
+
+### Testing at Scale
+
+A lot of the issues mentioned above could have been prevented with a better testing approach.
+To be clear, it's not like I was sending full runs willy-nilly. I checked outputs,
+but some issues only appeared past a certain scale (e.g., 100 Million documents).
+
+In hindsight, I would make two changes:
+1. Test certain things before scaling to the full dataset
+	1. Scaling compute and speed of output. Specifically, finding the best hyperparameters
+	2. Intra-endpoint consistency for GPUs
+	3. Benchmark performance of individual components, this would have helped understand potential chokepoints
+2. Regularly create the full index as we are processing (1M docs, 10M docs, 100M docs, etc.)
+	1. Make sure we can fetch documents with near perfect accuracy if they are the query. This would have caught the inter-endpoint inconsistencies.
+	2. Make sure queries return sensible responses. This would have helped catch the chunking earlier.
+	3. Evaluate the time required for responses
+	
+I only tested a couple of times mid run and should have done so more consistently.
+An automated test might even make sense here, to be able to understand 
+how scale affects the results.
+	
+	
 ## Conclusion
 
 
 Dense embeddings at this scale are feasible, but the hard parts are systems problems rather than modeling problems.
 To be fair, some could be tackled as a modeling problem, but that was outside the scope of this post.
 Ultimately the disk footprint, chunking throughput, chunking strategy, ID alignment, FAISS configuration, and serving architecture determine whether the system is usable.
- If I were doing this again, I would estimate index size and cluster layout earlier (using the code shared), make the corpus/run ID mapping explicit from the start, and 
+If I were doing this again, I would estimate index size and cluster layout earlier (using the code shared), make the corpus/run ID mapping explicit from the start, and 
  treat chunking throughput as a first-class bottleneck rather than a preprocessing detail.
 Hopefully this is helpful if you ever need to embed a large corpus.
