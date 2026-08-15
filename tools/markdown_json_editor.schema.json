@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://felixlabelle.com/schemas/markdown-json-editor.schema.json",
+  "title": "Markdown JSON Editor Input",
+  "description": "Recommended JSON format for tools/markdown_json_editor.py. The tool is permissive, but this schema documents the clearest supported shape.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/editList"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "edits": {
+          "$ref": "#/$defs/editList"
+        },
+        "suggestions": {
+          "$ref": "#/$defs/editList"
+        },
+        "changes": {
+          "$ref": "#/$defs/editList"
+        },
+        "items": {
+          "$ref": "#/$defs/editList"
+        },
+        "annotations": {
+          "$ref": "#/$defs/editList"
+        },
+        "comments": {
+          "$ref": "#/$defs/editList"
+        },
+        "reviews": {
+          "$ref": "#/$defs/editList"
+        },
+        "recommendations": {
+          "$ref": "#/$defs/editList"
+        }
+      },
+      "anyOf": [
+        { "required": ["edits"] },
+        { "required": ["suggestions"] },
+        { "required": ["changes"] },
+        { "required": ["items"] },
+        { "required": ["annotations"] },
+        { "required": ["comments"] },
+        { "required": ["reviews"] },
+        { "required": ["recommendations"] }
+      ],
+      "additionalProperties": true
+    }
+  ],
+  "$defs": {
+    "editList": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/editEntry"
+      }
+    },
+    "editEntry": {
+      "type": "object",
+      "description": "One suggested Markdown edit or annotation.",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Short label shown in the left-hand entry list."
+        },
+        "section": {
+          "type": "string",
+          "description": "Markdown section or heading this edit applies to."
+        },
+        "line": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Approximate 1-based Markdown line number."
+        },
+        "find": {
+          "type": "string",
+          "description": "Exact Markdown text to find before applying a replacement."
+        },
+        "replacement": {
+          "type": "string",
+          "description": "Text to insert or use as the replacement."
+        },
+        "comment": {
+          "type": "string",
+          "description": "Human-readable explanation of why the edit is useful."
+        }
+      },
+      "anyOf": [
+        { "required": ["replacement"] },
+        { "required": ["find"] },
+        { "required": ["comment"] },
+        { "required": ["line"] }
+      ],
+      "additionalProperties": true
+    }
+  }
+}

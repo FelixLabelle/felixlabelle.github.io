@@ -39,4 +39,4 @@ defaults:
     values:
       tags: Other
       
-exclude: ['drafts']
+exclude: ['drafts','holdout','backlog']

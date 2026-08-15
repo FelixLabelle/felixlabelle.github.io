@@ -1,2 +1,8 @@
 ﻿_site
 results
+*.bak
+__pycache__/
+
+# Private development content is never published from main.
+/drafts/
+/backlog/
